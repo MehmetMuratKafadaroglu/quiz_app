@@ -74,13 +74,17 @@ class GenericTree(Frame):
     def insert_args(self, values): 
         self.tree.insert('', END, values=values)
 
-
     def delete(self, item):
         self.tree.delete(item)
 
+    def delete_everything(self):
+        ids = self.tree.get_children()
+        for id in ids:
+            self.delete(id)
+            
 #This widgets are four main buttons that is used in most pages
 class MainButtons(Frame):
-    def __init__(self, master, back ,press, delete, edit):
+    def __init__(self, master, back ,press, delete, update):
         Frame.__init__(self, master)
         self.master = master
 
@@ -93,5 +97,25 @@ class MainButtons(Frame):
         self.delete_button = Button(self, text="Delete", command=delete, height=5, width=30)
         self.delete_button.grid(row=0, column=2)
 
-        self.refresh_button = Button(self, text="Edit", command=edit, height=5, width=30)
-        self.refresh_button.grid(row=0, column=3)
+        self.update_button = Button(self, text="Update", command=update, height=5, width=30)
+        self.update_button.grid(row=0, column=3)
+
+class EditMainButtons(Frame):
+    def __init__(self, master, back ,press, delete, edit, update):
+        Frame.__init__(self, master)
+        self.master = master
+
+        self.back_button = Button(self, text="Back", command=back, height=5, width=24)
+        self.back_button.grid(row=0, column=0)
+
+        self.add_button = Button(self, text="Add", command=press, height=5, width=24)
+        self.add_button.grid(row=0, column=1)
+        
+        self.delete_button = Button(self, text="Delete", command=delete, height=5, width=24)
+        self.delete_button.grid(row=0, column=2)
+
+        self.update_button = Button(self, text="Update", command=update, height=5, width=24)
+        self.update_button.grid(row=0, column=3)
+
+        self.refresh_button = Button(self, text="Edit", command=edit, height=5, width=24)
+        self.refresh_button.grid(row=0, column=4)
