@@ -101,7 +101,7 @@ class MainButtons(Frame):
         self.update_button.grid(row=0, column=3)
 
 class EditMainButtons(Frame):
-    def __init__(self, master, back ,press, delete, edit, update):
+    def __init__(self, master, back ,press, delete, edit, update, txt="Edit"):
         Frame.__init__(self, master)
         self.master = master
 
@@ -117,5 +117,5 @@ class EditMainButtons(Frame):
         self.update_button = Button(self, text="Update", command=update, height=5, width=24)
         self.update_button.grid(row=0, column=3)
 
-        self.refresh_button = Button(self, text="Edit", command=edit, height=5, width=24)
+        self.refresh_button = Button(self, text=txt, command=edit, height=5, width=24)
         self.refresh_button.grid(row=0, column=4)

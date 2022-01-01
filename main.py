@@ -50,7 +50,7 @@ class ModulePage(Frame):
         self.tree = GenericTree(master=self, dict=heads)
         self.tree.bind("<Double-1>", self.delete)
         self.buttons = EditMainButtons(self, back=self.back, press=self.add, edit=self.edit, delete=self.delete,
-                                       update=self.update)
+                                       update=self.update, txt="Edit quizes of this module")
         self.buttons.pack(fill=X, expand=True)
         self.refresh()
 
@@ -137,7 +137,7 @@ class QuizPage(Frame):
         self.tree.pack()
         self.tree.bind("<Double-1>", self.delete)
         self.buttons = EditMainButtons(self, back=self.back, press=self.add, edit=self.edit, delete=self.delete,
-                                       update=self.update)
+                                       update=self.update, txt="Edit questions of this quiz")
         self.buttons.pack(fill=X, expand=True)
         self.buttons.pack(side=BOTTOM, fill=X)
 
@@ -172,9 +172,7 @@ class QuizPage(Frame):
             values = []
             for result in results:
                 result_in_list = list(result)
-                copy = delete_element(result_in_list, 0)
-                copy = delete_element(copy, len(copy) - 1)
-
+                copy = del_first_and_last(result_in_list)
                 if copy[1]:
                     desired_element = 'Randomized'
                 else:
@@ -251,7 +249,7 @@ class QuestionPage(Frame):
         self.tree.pack()
         self.tree.bind("<Double-1>", self.delete)
         self.buttons = EditMainButtons(self, back=self.back, press=self.add, edit=self.edit, delete=self.delete,
-                                       update=self.update)
+                                       update=self.update, txt="Edit answers of this question")
         self.buttons.pack(fill=X, expand=True)
         self.buttons.pack(side=BOTTOM, fill=X)
 
@@ -283,8 +281,7 @@ class QuestionPage(Frame):
             values = []
             for result in results:
                 result_in_list = list(result)
-                copy = delete_element(result_in_list, 0)
-                copy = delete_element(copy, len(copy) - 1)
+                copy = del_first_and_last(result_in_list)
                 copy = list(copy)
                 values.append(copy)  
             generic_refresh(values, self.tree)
