@@ -248,6 +248,14 @@ class Quiz(Base):
     def set_randomisation_status(self, status):
         self.israndomized = status
 
+    @staticmethod
+    def get_quizes_with_modules():
+        con = sqlite3.connect('question_bank.db')
+        cur = con.cursor()
+        cur.execute("SELECT quizes.name, modules.name FROM quizes, modules WHERE quizes.module_id=modules.id")
+        results = cur.fetchall()
+        con.close()
+        return results
     def save(self, related_class):
         name, israndomized = self.name, self.israndomized
         foreign_key = related_class.get_id()

@@ -102,6 +102,14 @@ class EditMainButtons(Frame):
         self.edit_button = Button(self, text=txt, command=edit, height=5, width=24)
         self.edit_button.grid(row=0, column=4)\
 
+class TakeQuizButtons(Frame):
+    def __init__(self, master, back , take):
+        Frame.__init__(self, master)
+        self.master = master
+        self.back_button = Button(self, text="Back", command=back, height=5, width=60)
+        self.back_button.grid(row=0, column=0)
+        self.take_button = Button(self, text="Take", command=take, height=5, width=60)
+        self.take_button.grid(row=0, column=1)
 
 class RaiseMessage(Toplevel):
     def __init__(self, message):

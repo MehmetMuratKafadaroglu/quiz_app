@@ -302,8 +302,6 @@ class QuestionPage(Frame):
         question = self.get_selected_question()
         global register_question
         register_question = question
-        print(register_question.question)
-        print(register_question.question_type)
         UpdateAddQuestions(False)
 
     def get_question_type(self, number):
