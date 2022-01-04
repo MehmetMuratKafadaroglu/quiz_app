@@ -1,6 +1,4 @@
 import sqlite3
-from tkinter.constants import S
-
 
 # This is an abstract class. This class is just there to give other classes certain database related methods.
 class Base:
@@ -18,9 +16,13 @@ class Base:
         Every class should give certain values to this so that after an object initialised with this
         method they can be saved to database.
         """
-
-        con = sqlite3.connect('main.db')
+        con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
+
+        for value in values:
+            if value is None or value == '':
+                return False
+
         sql_code = "INSERT OR IGNORE INTO " + self.table_name + "("
         last_element = self.columns[len(self.columns) - 1]
 
@@ -52,6 +54,7 @@ class Base:
         cur.execute(sql_code)
         con.commit()
         con.close()
+        return True
 
     def delete(self, *values):
         """
@@ -59,7 +62,7 @@ class Base:
         Every class should give certain values to this so that after an object initialised with this
         method they can be deleted from the database.
         """
-        con = sqlite3.connect('main.db')
+        con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
         value_length = len(values)
         sql_code = "DELETE FROM " + self.table_name + " WHERE "
@@ -84,7 +87,6 @@ class Base:
         Get id method builds a sql syntax just like other methods.After an object 
         initialised and saved. Object's id can be taken from the database with this method.
         """
-
         value_length = len(values)
         query = "SELECT id FROM " + self.table_name + " WHERE "
         i = 0
@@ -101,7 +103,7 @@ class Base:
             if not is_end_of_query:
                 query += " AND "
             i += 1
-        con = sqlite3.connect('main.db')
+        con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
         cur.execute(query)
         id = cur.fetchone()
@@ -114,7 +116,7 @@ class Base:
         """
         Refresh is to be used to get related objects of a certain class.
         """
-        con = sqlite3.connect('main.db')
+        con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
         query = "SELECT * FROM %s WHERE %s=%s" % (self.table_name, foreign_key_column, foreign_key)
         cur.execute(query)
@@ -132,6 +134,8 @@ class Base:
         for item in kwargs.items():
             column = item[0]
             value = item[1]
+            if value is None or value == '':
+                return False
             try:
                 int(value)
                 sql_code += "%s=%d," % (column, value)
@@ -140,12 +144,12 @@ class Base:
 
         sql_code = sql_code[:-1]
         sql_code += " WHERE id=%d " % pk
-        con = sqlite3.connect('main.db')
+        con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
         cur.execute(sql_code)
         con.commit()
         con.close()
-
+        return True
 
 # This is module. Modules are related to quizes
 class Module(Base):
@@ -182,7 +186,11 @@ class Module(Base):
 
     def save(self):
         name = self.name
-        super().save(name)
+        is_exist = self.get_id()
+        if is_exist:
+            return False
+        else:
+            return super().save(name)
 
     def delete(self):
         name = self.name
@@ -194,7 +202,7 @@ class Module(Base):
         return id
 
     def refresh(self):
-        con = sqlite3.connect('main.db')
+        con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
         query = "SELECT name FROM " + self.table_name + ";"
         cur.execute(query)
@@ -203,8 +211,7 @@ class Module(Base):
         return results
 
     def update(self, pk):
-        super().update(pk, name=self.name)
-
+        return super().update(pk, name=self.name)
 
 # This is the quiz. A quiz have a name and a module it also may have multiple modules.
 # The quiz can have selected questions or questions can be randomized
@@ -244,7 +251,11 @@ class Quiz(Base):
     def save(self, related_class):
         name, israndomized = self.name, self.israndomized
         foreign_key = related_class.get_id()
-        super().save(name, israndomized, foreign_key)
+        is_exist = self.get_id(related_class)
+        if is_exist:
+            return False
+        else:
+            return super().save(name, israndomized, foreign_key)
 
     def delete(self, related_class):
         name, israndomized = self.name, self.israndomized
@@ -261,17 +272,17 @@ class Quiz(Base):
 
     def update(self, related_class, old_object):
         pk = old_object.get_id(related_class)
-        super().update(pk, name=self.name, is_randomized=self.israndomized)
-
+        return super().update(pk, name=self.name, is_randomized=self.israndomized)
 
 # Every question needs a text. question parameter stands for the question itself.
 class Question(Base):
-    def __init__(self, question=None, answers=None):
+    def __init__(self, question=None, question_type=None,answers=None):
         self.question = question
+        self.question_type = question_type
         self.right_answers = []
         self.answers = answers
         self.table_name = "questions"
-        self.columns = ["question", "quiz_id"]
+        self.columns = ["question", "question_type", "quiz_id"]
 
         if answers is not None:
             for answer in answers:
@@ -305,28 +316,45 @@ class Question(Base):
     def get_right_answers(self):
         return self.right_answers
 
-    def save(self, related_class, module_class):
+    def save(self, quiz, module):
         question = self.question
-        foreign_key = related_class.get_id(module_class)
-        super().save(question, foreign_key)
+        question_type = self.question_type
+        foreign_key = quiz.get_id(module)
+        is_exist = self.get_id(quiz, module)
+        if is_exist:
+            return False     
+        else:
+            return super().save(question, question_type, foreign_key)
 
     def delete(self, related_class, module_class):
         question = self.question
         foreign_key = related_class.get_id(module_class)
         return super().delete(question, foreign_key)
 
+    def get_question_type(self):
+        typ = self.question_type
+        if typ == 'Multiple Answer Question':
+            return 1
+        elif typ == 'True False Question':
+            return 2
+        elif typ == 'Best Match Question':
+            return 3
+        else :
+            raise ValueError("Value must be between 1-3")    
+
     def get_id(self, quiz, module):
         question = self.question
+        question_type = self.get_question_type()
         foreign_key = quiz.get_id(module)
-        id = super().get_id(question, foreign_key)
+        id = super().get_id(question, question_type,foreign_key)
         return id
 
     def refresh(self, foreign_key):
-        return super().refresh(self.columns[1], foreign_key)
+        return super().refresh(self.columns[2], foreign_key)
 
     def update(self, quiz, module, old_object):
         pk = old_object.get_id(quiz, module)
-        super().update(pk, question=self.question)
+        return super().update(pk, question=self.question)
 
 
 # This is the answer of a question. Answers are related to modules
@@ -359,7 +387,11 @@ class Answer(Base):
     def save(self, question, quiz, module):
         description, iscorrect, why_iscorrect = self.description, self.iscorrect, self.why_iscorrect
         foreign_key = question.get_id(quiz, module)
-        super().save(description, iscorrect, why_iscorrect, foreign_key)
+        is_exist = self.get_id(question, quiz, module)
+        if is_exist:
+            return False
+        else:
+            return super().save(description, iscorrect, why_iscorrect, foreign_key)
 
     def delete(self, question, quiz, module):
         iscorrect, description, why_iscorrect = self.iscorrect, self.description, self.why_iscorrect
@@ -373,8 +405,9 @@ class Answer(Base):
 
     def refresh(self, question, quiz, module):
         foreign_key = question.get_id(quiz, module)
-        return super().refresh(self.columns[3], foreign_key)
+        field = self.columns[3]
+        return super().refresh(field, foreign_key)
 
     def update(self, question, quiz, module, old_object):
         pk = old_object.get_id(question, quiz, module)
-        super().update(pk, description=self.description, iscorrect=self.iscorrect, why_iscorrect=self.why_iscorrect)
+        return super().update(pk, description=self.description, iscorrect=self.iscorrect, why_iscorrect=self.why_iscorrect)

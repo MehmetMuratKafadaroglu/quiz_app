@@ -1,7 +1,7 @@
 import sqlite3
 
 def create():
-    con = sqlite3.connect('main.db')
+    con = sqlite3.connect('question_bank.db')
     cur = con.cursor()
     cur.execute("""CREATE TABLE IF NOT EXISTS 
         modules(
@@ -23,7 +23,8 @@ def create():
     cur.execute("""CREATE TABLE IF NOT EXISTS 
         questions(
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        question VARCHAR(500),
+        question VARCHAR(50),
+        question_type INTEGER,
         quiz_id INTEGER,
         UNIQUE(question, quiz_id),
         FOREIGN KEY(quiz_id) REFERENCES quizes(id)
@@ -38,6 +39,14 @@ def create():
         question_id INTEGER,
         UNIQUE(description, question_id)
         FOREIGN KEY(question_id) REFERENCES questions(id)
+        );
+        """)
+    cur.execute("""CREATE TABLE IF NOT EXISTS 
+        results(
+        id INTEGER PRIMARY KEY, 
+        quiz_id INTERGER,
+        true_answers INTEGER,
+        FOREIGN KEY(quiz_id) REFERENCES quizes(id)
         );
         """)
     con.commit()
@@ -60,7 +69,7 @@ def delete_element(_list, index):
     copy.remove(element)       
     return copy 
 
-def replace_element(_list, current_element, desired_element):
+def replace_elements(_list, current_element, desired_element):
     copy = []
     for element in _list:
         if element == current_element:

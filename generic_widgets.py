@@ -34,7 +34,7 @@ class InputField(Frame):
         self.side=side
 
 #This class is made to give user two options. Options can be true and false or randomized and not randomized or etc
-class TwoOptionField(Frame):
+class OptionField(Frame):
     def __init__(self, master, text, side=TOP, options=['True', 'False']):
         Frame.__init__(self, master)
         self.master = master
@@ -81,25 +81,7 @@ class GenericTree(Frame):
         ids = self.tree.get_children()
         for id in ids:
             self.delete(id)
-            
-#This widgets are four main buttons that is used in most pages
-class MainButtons(Frame):
-    def __init__(self, master, back ,press, delete, update):
-        Frame.__init__(self, master)
-        self.master = master
-
-        self.back_button = Button(self, text="Back", command=back, height=5, width=30)
-        self.back_button.grid(row=0, column=0)
-
-        self.add_button = Button(self, text="Add", command=press, height=5, width=30)
-        self.add_button.grid(row=0, column=1)
-        
-        self.delete_button = Button(self, text="Delete", command=delete, height=5, width=30)
-        self.delete_button.grid(row=0, column=2)
-
-        self.update_button = Button(self, text="Update", command=update, height=5, width=30)
-        self.update_button.grid(row=0, column=3)
-
+ 
 class EditMainButtons(Frame):
     def __init__(self, master, back ,press, delete, edit, update, txt="Edit"):
         Frame.__init__(self, master)
@@ -117,5 +99,14 @@ class EditMainButtons(Frame):
         self.update_button = Button(self, text="Update", command=update, height=5, width=24)
         self.update_button.grid(row=0, column=3)
 
-        self.refresh_button = Button(self, text=txt, command=edit, height=5, width=24)
-        self.refresh_button.grid(row=0, column=4)
+        self.edit_button = Button(self, text=txt, command=edit, height=5, width=24)
+        self.edit_button.grid(row=0, column=4)\
+
+
+class RaiseMessage(Toplevel):
+    def __init__(self, message):
+        Toplevel.__init__(self) 
+        self.message = message
+        self.display = Label(self, text=message)
+        self.display.pack(fill=BOTH, expand=1)
+        self.geometry('400x50')
