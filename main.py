@@ -1,4 +1,3 @@
-from tkinter import *
 from objects import *
 from generic_widgets import *
 from db import *
@@ -7,6 +6,7 @@ register_module = None
 register_quiz = None
 register_question = None
 register_answer = None
+
 
 class UpdateAddModule(Toplevel):
     def __init__(self, title, item=None):
@@ -26,7 +26,7 @@ class UpdateAddModule(Toplevel):
 
     def raise_message(self):
         RaiseMessage("Module name must not be taken or blank")
-        
+
     def get_module(self):
         module_name = self.name.get_input()
         module_name = module_name.rstrip()
@@ -44,6 +44,7 @@ class UpdateAddModule(Toplevel):
             self.raise_message()
         start_page.refresh()
         self.destroy()
+
 
 class ModulePage(Frame):
     def __init__(self, master):
@@ -93,6 +94,7 @@ class ModulePage(Frame):
         carry_item = carry_item[0]
         Module(name=carry_item).delete()
 
+
 class UpdateAddQuiz(Toplevel):
     def __init__(self, is_add=True):
         Toplevel.__init__(self)
@@ -113,7 +115,7 @@ class UpdateAddQuiz(Toplevel):
 
     def raise_message(self):
         RaiseMessage("Quiz name must not be taken or blank")
-        
+
     def get_quiz(self):
         quiz_name = self.name.get_input()
         quiz_name = quiz_name.rstrip()
@@ -131,9 +133,10 @@ class UpdateAddQuiz(Toplevel):
         else:
             is_saved = quiz.update(register_module, register_quiz)
         if not is_saved:
-                self.raise_message()
+            self.raise_message()
         quiz_page.refresh()
         self.destroy()
+
 
 class QuizPage(Frame):
     def __init__(self, master):
@@ -233,7 +236,7 @@ class UpdateAddQuestions(Toplevel):
         self.question_type.pack(fill=X, expand=True)
         save = Button(self, text=txt.upper(), height=5, background='green', command=self.press)
         save.pack(fill=X, expand=True)
-    
+
     def raise_message(self):
         RaiseMessage("Question values must not be taken or blank")
 
@@ -254,7 +257,7 @@ class UpdateAddQuestions(Toplevel):
         question = question.rstrip()
         question_type = self.get_question_type()
         return Question(question=question, question_type=question_type)
-        
+
     def press(self):
         question = self.get_question()
         if self.is_add:
@@ -266,18 +269,19 @@ class UpdateAddQuestions(Toplevel):
         question_page.refresh()
         self.destroy()
 
+
 class QuestionPage(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
         self.master = master
-        heads = {'name': 'Questions of the Quiz', 'type':'Type of Question'}
+        heads = {'name': 'Questions of the Quiz', 'type': 'Type of Question'}
         self.tree = GenericTree(master=self, dict=heads)
         self.tree.pack()
         self.tree.bind("<Double-1>", self.delete)
         self.buttons = EditMainButtons(self, back=self.back, press=self.add, edit=self.edit, delete=self.delete,
                                        update=self.update, txt="Edit answers of this question")
         self.buttons.pack(fill=X, expand=True)
-        
+
     def back(self):
         quiz_page.pack(fill=BOTH, expand=True)
         self.pack_forget()
@@ -298,6 +302,8 @@ class QuestionPage(Frame):
         question = self.get_selected_question()
         global register_question
         register_question = question
+        print(register_question.question)
+        print(register_question.question_type)
         UpdateAddQuestions(False)
 
     def get_question_type(self, number):
@@ -321,9 +327,9 @@ class QuestionPage(Frame):
                 copy = list(copy)
                 question_type = self.get_question_type(copy[1])
                 copy = replace_elements(copy, copy[1], question_type)
-                values.append(copy)  
+                values.append(copy)
             generic_refresh(values, self.tree)
-        
+
     def edit(self):
         question = self.get_selected_question()
         global register_question
@@ -337,6 +343,7 @@ class QuestionPage(Frame):
         carry_item = self.tree.get_item(item)
         self.tree.delete(item)
         Question(question=carry_item[0]).delete(register_quiz, register_module)
+
 
 class UpdateAddAnswers(Toplevel):
     def __init__(self, is_add=True):
@@ -379,9 +386,9 @@ class UpdateAddAnswers(Toplevel):
         if self.is_add:
             is_saved = answer.save(register_question, register_quiz, register_module)
         else:
-            is_saved=answer.update(register_question, register_quiz, register_module, register_answer)
+            is_saved = answer.update(register_question, register_quiz, register_module, register_answer)
         if not is_saved:
-                self.raise_message()
+            self.raise_message()
         answer_page.refresh()
         self.destroy()
 
@@ -395,7 +402,8 @@ class AnswerPage(Frame):
         self.tree = GenericTree(master=self, dict=heads)
         self.tree.pack()
         self.tree.bind("<Double-1>", self.delete)
-        self.buttons = EditMainButtons(self, back=self.back, press=self.add, update=self.update, delete=self.delete, edit=None)
+        self.buttons = EditMainButtons(self, back=self.back, press=self.add, update=self.update, delete=self.delete,
+                                       edit=None)
         self.buttons.edit_button.grid_forget()
         self.buttons.pack(fill=X, expand=True)
         self.buttons.pack(side=BOTTOM, fill=X)
@@ -422,7 +430,7 @@ class AnswerPage(Frame):
         why_iscorrect = item[2]
 
         if bool(iscorrect):
-            iscorrect =1 
+            iscorrect = 1
         else:
             iscorrect = 0
         answer = Answer(description=description, iscorrect=iscorrect, why_iscorrect=why_iscorrect)
@@ -447,17 +455,18 @@ class AnswerPage(Frame):
         carry_item = self.tree.get_item(item)
         self.tree.delete(item)
 
-        description =carry_item[0]
-        iscorrect=carry_item[1]
-        why_iscorrect=carry_item[2]
+        description = carry_item[0]
+        iscorrect = carry_item[1]
+        why_iscorrect = carry_item[2]
 
         if bool(iscorrect):
             iscorrect = 1
         else:
-            iscorrect=0
-        
+            iscorrect = 0
+
         answer = Answer(description, iscorrect, why_iscorrect)
         answer.delete(register_question, register_quiz, register_module)
+
 
 class App(Tk):
     def __init__(self):

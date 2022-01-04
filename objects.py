@@ -333,14 +333,16 @@ class Question(Base):
 
     def get_question_type(self):
         typ = self.question_type
-        if typ == 'Multiple Answer Question':
+        if typ in [1,2,3]:
+            return typ
+        elif typ == 'Multiple Answer Question':
             return 1
         elif typ == 'True False Question':
             return 2
         elif typ == 'Best Match Question':
             return 3
-        else :
-            raise ValueError("Value must be between 1-3")    
+        else:
+            raise ValueError("Value must be between 1-3")
 
     def get_id(self, quiz, module):
         question = self.question
@@ -354,7 +356,7 @@ class Question(Base):
 
     def update(self, quiz, module, old_object):
         pk = old_object.get_id(quiz, module)
-        return super().update(pk, question=self.question)
+        return super().update(pk, question=self.question, question_type=self.get_question_type())
 
 
 # This is the answer of a question. Answers are related to modules
