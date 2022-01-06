@@ -1,29 +1,31 @@
 from tkinter import *
 from tkinter.ttk import Combobox, Treeview
 
-#This is InputField class. This class gives label and text together.
+
+# This is InputField class. This class gives label and text together.
 class InputField(Frame):
     def __init__(self, master, text, side=TOP):
-        Frame.__init__(self, master)        
+        Frame.__init__(self, master)
         self.master = master
         self.text = text
         self.side = side
         Label(self, text=self.text).pack(side=self.side)
-        
-        self.txt =Text(self, height=8)
+
+        self.txt = Text(self, height=8)
         if side == TOP:
             txt_side = BOTTOM
-        else :
+        else:
             txt_side = TOP
 
         self.txt.pack(side=txt_side, fill=X, expand=TRUE, padx=20, pady=20)
         self.pack(fill=X, expand=TRUE)
+
     def get_input(self):
-        return self.txt.get("1.0",'end')
+        return self.txt.get("1.0", 'end')
 
     def get_text(self):
         return self.text
-    
+
     def get_side(self):
         return self.side
 
@@ -31,47 +33,50 @@ class InputField(Frame):
         self.text = text
 
     def set_side(self, side):
-        self.side=side
+        self.side = side
 
-#This class is made to give user two options. Options can be true and false or randomized and not randomized or etc
+
+# This class is made to give user two options. Options can be true and false or randomized and not randomized or etc
 class OptionField(Frame):
     def __init__(self, master, text, side=TOP, options=['True', 'False']):
         Frame.__init__(self, master)
         self.master = master
         Label(self, text=text).pack(side=side)
-        self.option= Combobox(self, values=options)
+        self.option = Combobox(self, values=options)
         self.option.pack(side=RIGHT, fill=X, expand=TRUE, padx=20, pady=20)
         self.pack(fill=X, expand=TRUE)
+
     def get_input(self):
         return self.option.get()
 
-#This is a generic treeview that shows our objects
+
+# This is a generic treeview that shows our objects
 class GenericTree(Frame):
     def __init__(self, master, dict):
         Frame.__init__(self, master)
         self.master = master
         keys = dict.keys()
         self.columns = list(keys)
-        self.tree = Treeview(master, columns=self.columns,  show="headings", height=25)
-        for key in keys:   
+        self.tree = Treeview(master, columns=self.columns, show="headings", height=25)
+        for key in keys:
             self.tree.heading(key, text=dict[key], anchor=CENTER)
         self.tree.pack(fill=X)
-    
+
     def get_values(self):
         values = []
         ids = self.tree.get_children()
-        for id in ids:
-            values.append(self.get_item(id))
+        for pk in ids:
+            values.append(self.get_item(pk))
         return values
 
     def selected_item(self):
         selected_item = self.tree.selection()[0]
         return selected_item
 
-    def get_item(self, id):
-        return self.tree.item(id)['values']
-    
-    def insert_args(self, values): 
+    def get_item(self, pk):
+        return self.tree.item(pk)['values']
+
+    def insert_args(self, values):
         self.tree.insert('', END, values=values)
 
     def delete(self, item):
@@ -79,11 +84,12 @@ class GenericTree(Frame):
 
     def delete_everything(self):
         ids = self.tree.get_children()
-        for id in ids:
-            self.delete(id)
- 
+        for pk in ids:
+            self.delete(pk)
+
+
 class EditMainButtons(Frame):
-    def __init__(self, master, back ,press, delete, edit, update, txt="Edit"):
+    def __init__(self, master, back, press, delete, edit, update, txt="Edit"):
         Frame.__init__(self, master)
         self.master = master
 
@@ -92,7 +98,7 @@ class EditMainButtons(Frame):
 
         self.add_button = Button(self, text="Add", command=press, height=5, width=24)
         self.add_button.grid(row=0, column=1)
-        
+
         self.delete_button = Button(self, text="Delete", command=delete, height=5, width=24)
         self.delete_button.grid(row=0, column=2)
 
@@ -100,10 +106,11 @@ class EditMainButtons(Frame):
         self.update_button.grid(row=0, column=3)
 
         self.edit_button = Button(self, text=txt, command=edit, height=5, width=24)
-        self.edit_button.grid(row=0, column=4)\
+        self.edit_button.grid(row=0, column=4)
+
 
 class TakeQuizButtons(Frame):
-    def __init__(self, master, back , take):
+    def __init__(self, master, back, take):
         Frame.__init__(self, master)
         self.master = master
         self.back_button = Button(self, text="Back", command=back, height=5, width=60)
@@ -111,10 +118,28 @@ class TakeQuizButtons(Frame):
         self.take_button = Button(self, text="Take", command=take, height=5, width=60)
         self.take_button.grid(row=0, column=1)
 
+
 class RaiseMessage(Toplevel):
     def __init__(self, message):
-        Toplevel.__init__(self) 
+        Toplevel.__init__(self)
         self.message = message
         self.display = Label(self, text=message)
         self.display.pack(fill=BOTH, expand=1)
         self.geometry('400x50')
+
+
+class AnswerButtons(Frame):
+    def __init__(self, master, question):
+        Frame.__init__(self, master)
+        self.master = master
+        answers = question.get_answers()
+        length = len(answers)
+        button_width = 120 / length
+        button_width = int(button_width)
+
+        for i in range(length):
+            answer = answers[i]
+            description = answer.get_description()
+            Button(self, text=description, height=5, width=button_width, command=self.master.next_question)\
+                .grid(row=i, column=0, pady=10)
+        self.master.adjust_height(i + 1)
