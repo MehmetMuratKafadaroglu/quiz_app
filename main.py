@@ -1,5 +1,6 @@
 from objects import *
 from generic_widgets import *
+import random
 
 register_module = None
 register_quiz = None
@@ -631,9 +632,7 @@ class Listview(Frame):
         quiz = Quiz(quiz, status)
         return quiz
 
-    def get_questions_of_selected_quiz(self):
-        quiz = self.get_selected_quiz()
-        module = self.get_selected_module()
+    def get_questions_of_selected_quiz(self, quiz, module):
         self.quiz_id = quiz.get_id(module)
         questions = Question().refresh(self.quiz_id)
         questions = Question.get_question_with_answers(questions, quiz, module)
@@ -643,7 +642,13 @@ class Listview(Frame):
         self.index += 1
 
     def take(self):
-        questions = self.get_questions_of_selected_quiz()
+        quiz = self.get_selected_quiz()
+        module = self.get_selected_module()
+        questions = self.get_questions_of_selected_quiz(quiz, module)
+
+        is_randomized = quiz.get_randomisation_status()
+        if is_randomized:
+            random.shuffle(questions)
         question_view = AnswerView(root, questions, self.quiz_id)
         question_view.pack()
         self.pack_forget()
