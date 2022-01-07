@@ -11,11 +11,11 @@ class TestObjects(unittest.TestCase):
         self.is_saved = self.test_module.save()
         self.module_id = self.test_module.get_id()
 
-        self.test_quiz = objects.Quiz("General Computer Science Quiz", False)
+        self.test_quiz = objects.Quiz("General Computer Science Quiz", True)
         self.is_quiz_saved = self.test_quiz.save(self.test_module)
         self.quiz_id = self.test_quiz.get_id(self.test_module)
 
-        self.test_question = objects.Question("Is python supports functional programming ?", 1)
+        self.test_question = objects.Question("Is python supports functional programming ?", 2)
         self.is_question_saved = self.test_question.save(self.test_quiz, self.test_module)
         self.question_id = self.test_question.get_id(self.test_quiz, self.test_module)
 
@@ -26,7 +26,15 @@ class TestObjects(unittest.TestCase):
         self.test_question3 = objects.Question("What is the first high level language ?", 1)
         self.is_question3_saved = self.test_question3.save(self.test_quiz, self.test_module)
         self.test_question3_id = self.test_question3.get_id(self.test_quiz, self.test_module)
-
+        
+        self.test_question4 = objects.Question("Is python statically typed language", 2)
+        self.is_question4_saved = self.test_question4.save(self.test_quiz, self.test_module)
+        self.test_question4_id = self.test_question4.get_id(self.test_quiz, self.test_module)
+        
+        self.test_question5 = objects.Question("Which option is not a python data type", 3)
+        self.is_question5_saved = self.test_question5.save(self.test_quiz, self.test_module)
+        self.test_question5_id = self.test_question5.get_id(self.test_quiz, self.test_module)
+        
         self.answer1 = objects.Answer("Yes, it does", 1, "Python is a multi-paradigm programming language")
         self.answer2 = objects.Answer("No, it does not", 0, "Python is a multi-paradigm programming language")
 
@@ -55,8 +63,28 @@ because of Turing machine""")
         self.test_question3_answer3.save(self.test_question3, self.test_quiz, self.test_module)
         self.test_question3_answer4.save(self.test_question3, self.test_quiz, self.test_module)
 
+        self.test_question4_answer1 = objects.Answer("Yes, it is", 1, "Python is a dynamically typed")
+        self.test_question4_answer2 = objects.Answer("No, it is not", 0, "Python is a dynamically typed")
+        self.test_question4_answer1.save(self.test_question4, self.test_quiz, self.test_module)
+        self.test_question4_answer2.save(self.test_question4, self.test_quiz, self.test_module)
+
+        self.test_question5_answer1 = objects.Answer("Array", 1, "Array is not a python data type")
+        self.test_question5_answer2 = objects.Answer("Integer", 0, "Integer is a python data type")
+        self.test_question5_answer3 = objects.Answer("Float", 1, "Float is a python data type")
+        self.test_question5_answer4 = objects.Answer("String", 1, "String is a python data type")
+        self.test_question5_answer5 = objects.Answer("List", 1, "List is a python data type")
+        self.test_question5_answer6 = objects.Answer("Dictionary", 1, "Dictionary is a python data type")
+
+        self.test_question5_answer1.save(self.test_question5, self.test_quiz, self.test_module)
+        self.test_question5_answer2.save(self.test_question5, self.test_quiz, self.test_module)
+        self.test_question5_answer3.save(self.test_question5, self.test_quiz, self.test_module)
+        self.test_question5_answer4.save(self.test_question5, self.test_quiz, self.test_module)
+        self.test_question5_answer5.save(self.test_question5, self.test_quiz, self.test_module)
+        self.test_question5_answer6.save(self.test_question5, self.test_quiz, self.test_module)
+
     """def tearDown(self):
-        os.remove('question_bank.db')"""
+        os.remove('question_bank.db')
+        """
 
     def test_name(self):
         self.assertIsNotNone(self.test_module.get_name())
