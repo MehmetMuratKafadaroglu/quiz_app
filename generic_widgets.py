@@ -110,12 +110,14 @@ class EditMainButtons(Frame):
 
 
 class TakeQuizButtons(Frame):
-    def __init__(self, master, back, take):
+    def __init__(self, master, back, take, txt=None):
         Frame.__init__(self, master)
         self.master = master
         self.back_button = Button(self, text="Back", command=back, height=5, width=60)
         self.back_button.grid(row=0, column=0)
-        self.take_button = Button(self, text="Take", command=take, height=5, width=60)
+        if txt is None:
+            txt = 'Take'
+        self.take_button = Button(self, text=txt, command=take, height=5, width=60)
         self.take_button.grid(row=0, column=1)
 
 
@@ -128,18 +130,65 @@ class RaiseMessage(Toplevel):
         self.geometry('400x50')
 
 
-class AnswerButtons(Frame):
+class AnswersAndLabel(Frame):
     def __init__(self, master, question):
         Frame.__init__(self, master)
         self.master = master
-        answers = question.get_answers()
-        length = len(answers)
+        self.answers = question.get_answers()
+        length = len(self.answers)
         button_width = 120 / length
         button_width = int(button_width)
 
+        Label(self, text=question.get_question(), height=8, relief='solid', width=100).grid(row=0, column=0, pady=10)
         for i in range(length):
-            answer = answers[i]
-            description = answer.get_description()
-            Button(self, text=description, height=5, width=button_width, command=self.master.next_question)\
-                .grid(row=i, column=0, pady=10)
+            answer = self.answers[i]
+            AnswerButton(self, answer, button_width).grid(row=i + 1, column=0, pady=10)
         self.master.adjust_height(i + 1)
+
+    def next(self, status, why_iscorrect):
+        self.master.next_question(status, why_iscorrect)
+
+
+class AnswerButton(Frame):
+    def __init__(self, master, answer, btn_width):
+        Frame.__init__(self, master)
+        self.master = master
+        self.status = answer.get_iscorrect()
+        self.description = answer.get_description()
+        self.why_iscorrect = answer.get_why_iscorrect()
+        self.btn = Button(self, text=self.description, width=btn_width, command=self.press, height=5)
+        self.btn.pack(fill=BOTH, expand=1)
+
+    def press(self):
+        self.master.next(self.status, self.why_iscorrect)
+
+
+class Results(Frame):
+    def __init__(self, master, results, why_iscorrect):
+        Frame.__init__(self, master)
+        self.results = results
+        self.why_iscorrect = why_iscorrect
+        self.final_result = 0
+        self.labels = []
+        number_of_question = len(self.results)
+        for i in range(number_of_question):
+            result = self.results[i]
+            self.final_result += result
+            if result:
+                result = 'Correct '
+            else:
+                result = 'Not Correct'
+            result += '\nExplanation: ' + self.why_iscorrect[i]
+            txt = "%s. Question is: %s" % (i + 1, result)
+            carry_label = Label(self, text=txt, height=3)
+            self.labels.append(carry_label)
+        txt = "Your final result is %s / %s" % (self.final_result, number_of_question)
+
+        Label(self, text=txt, height=8, relief='solid').pack(fill=X, expand=True)
+        Button(self, text="Exit", command=self.exit, height=5).pack(fill=X, expand=True)
+        for label in self.labels:
+            label.pack(fill=X, expand=1)
+
+    def exit(self):
+        self.master.exit()
+

@@ -1,33 +1,46 @@
 import unittest
 import objects
-from db import create
 import os
+
+
 class TestObjects(unittest.TestCase):
     def setUp(self):
-        create()
-        self.test_module = objects.Module("test_module")
+        os.remove('question_bank.db')
+        objects.Custom.create()
+        self.test_module = objects.Module("Paradigms of Programming")
         self.is_saved = self.test_module.save()
         self.module_id = self.test_module.get_id()
 
-        self.test_quiz = objects.Quiz("test_quiz", False)
+        self.test_quiz = objects.Quiz("General Computer Science Quiz", False)
         self.is_quiz_saved = self.test_quiz.save(self.test_module)
         self.quiz_id = self.test_quiz.get_id(self.test_module)
 
-        self.test_question = objects.Question("Is Taiwan a country", 1)
+        self.test_question = objects.Question("Is python supports functional programming ?", 1)
         self.is_question_saved = self.test_question.save(self.test_quiz, self.test_module)
         self.question_id = self.test_question.get_id(self.test_quiz, self.test_module)
 
-        self.test_question2 = objects.Question("What happened in Tienanmen Square", 1)
+        self.test_question2 = objects.Question("Who is considered founder of computer science ?", 1)
         self.is_question2_saved = self.test_question2.save(self.test_quiz, self.test_module)
         self.test_question2_id = self.test_question2.get_id(self.test_quiz, self.test_module)
 
-        self.answer1 = objects.Answer("Yes, it is", 0, "Because it is a country")
-        self.answer2 = objects.Answer("No, it is not", 1, "Because it is a country")
+        self.test_question3 = objects.Question("What is the first high level language ?", 1)
+        self.is_question3_saved = self.test_question3.save(self.test_quiz, self.test_module)
+        self.test_question3_id = self.test_question3.get_id(self.test_quiz, self.test_module)
 
-        self.test_question2_answer1 = objects.Answer("Nothing", 1, "Because nothing have happened")
-        self.test_question2_answer2 = objects.Answer("People celebrated mao", 0, "Because nothing have happened")
-        self.test_question2_answer3 = objects.Answer("Touristic activity", 0, "Because nothing have happened")
-        self.test_question2_answer4 = objects.Answer("Massacre", 0, "Because nothing have happened")
+        self.answer1 = objects.Answer("Yes, it does", 1, "Python is a multi-paradigm programming language")
+        self.answer2 = objects.Answer("No, it does not", 0, "Python is a multi-paradigm programming language")
+
+        self.test_question2_answer1 = objects.Answer("Boris Johnson", 0, "Boris Johnson has nothing to do with computer science")
+        self.test_question2_answer2 = objects.Answer("Edsger W. Dijkstra", 0, """Although 
+Dijkstra was awell known early computer scientist he is not considered founder of computer science""")
+        self.test_question2_answer3 = objects.Answer("Alan Turing", 1, """Alan Turing is considered founder of computer science
+because of Turing machine""")
+        self.test_question2_answer4 = objects.Answer("Dennis Ritchie", 0, "No Dennis Ritchie is not considered")
+
+        self.test_question3_answer1 = objects.Answer("Lisp", 0, "Lisp is second you were close! answer is Fortran")
+        self.test_question3_answer2 = objects.Answer("Fortran", 1, "Yes fortan is first high level language")
+        self.test_question3_answer3 = objects.Answer("C", 0, "No C is not, answer is Fortran")
+        self.test_question3_answer4 = objects.Answer("Pascal", 0, "No Pascal is not, answer is Fortran")
 
         self.is_answer1_saved = self.answer1.save(self.test_question, self.test_quiz, self.test_module)
         self.is_answer2_saved = self.answer2.save(self.test_question, self.test_quiz, self.test_module)
@@ -36,6 +49,11 @@ class TestObjects(unittest.TestCase):
         self.test_question2_answer2.save(self.test_question2, self.test_quiz, self.test_module)
         self.test_question2_answer3.save(self.test_question2, self.test_quiz, self.test_module)
         self.test_question2_answer4.save(self.test_question2, self.test_quiz, self.test_module)
+
+        self.test_question3_answer1.save(self.test_question3, self.test_quiz, self.test_module)
+        self.test_question3_answer2.save(self.test_question3, self.test_quiz, self.test_module)
+        self.test_question3_answer3.save(self.test_question3, self.test_quiz, self.test_module)
+        self.test_question3_answer4.save(self.test_question3, self.test_quiz, self.test_module)
 
     """def tearDown(self):
         os.remove('question_bank.db')"""

@@ -404,8 +404,8 @@ class Question(Base):
         for question in questions:
             pk = question.get_id(quiz, module)
             answers = Answer().refresh(foreign_key=pk)
-            answers = Answer.auto_init(answers)
-            question.set_answers(answers)
+            copy = Answer.auto_init(answers)
+            question.set_answers(copy)
             final.append(question)
         return final
 
@@ -431,7 +431,7 @@ class Answer(Base):
         self.iscorrect = answer_iscorrect
 
     def get_why_iscorrect(self):
-        self.why_iscorrect
+        return self.why_iscorrect
 
     def set_why_iscorrect(self, answer_why_iscorrect):
         self.why_iscorrect = answer_why_iscorrect
@@ -476,3 +476,143 @@ class Answer(Base):
             carry = Answer(description, iscorrect, why_iscorrect)
             values.append(carry)
         return values
+
+class Custom:
+    @staticmethod
+    def create():
+        con = sqlite3.connect('question_bank.db')
+        cur = con.cursor()
+        cur.execute("""CREATE TABLE IF NOT EXISTS 
+            modules(
+            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            name VARCHAR(50),
+            UNIQUE(name)
+            );
+            """)
+        cur.execute("""CREATE TABLE IF NOT EXISTS
+            quizes(
+            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            name VARCHAR(50), 
+            is_randomized INTEGER, 
+            module_id INTEGER,
+            UNIQUE(name, module_id),
+            FOREIGN KEY(module_id) REFERENCES modules(id)
+            );
+            """)
+        cur.execute("""CREATE TABLE IF NOT EXISTS 
+            questions(
+            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            question VARCHAR(50),
+            question_type INTEGER,
+            quiz_id INTEGER,
+            UNIQUE(question, quiz_id),
+            FOREIGN KEY(quiz_id) REFERENCES quizes(id)
+            );
+            """)
+        cur.execute("""CREATE TABLE IF NOT EXISTS 
+            answers(
+            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            description VARCHAR(500),
+            iscorrect INTEGER,
+            why_iscorrect VARCHAR(500),
+            question_id INTEGER,
+            UNIQUE(description, question_id)
+            FOREIGN KEY(question_id) REFERENCES questions(id)
+            );
+            """)
+        cur.execute("""CREATE TABLE IF NOT EXISTS 
+            results(
+            id INTEGER PRIMARY KEY, 
+            quiz_id INTEGER,
+            correct_answers INTEGER,
+            number_of_questions INTEGER, 
+            FOREIGN KEY(quiz_id) REFERENCES quizes(id)
+            );
+            """)
+        con.commit()
+        con.close()
+
+    @staticmethod
+    def add_results(results, quiz_id):
+        con = sqlite3.connect('question_bank.db')
+        cur = con.cursor()
+        pk = quiz_id
+        number_of_questions = len(results)
+        final_result = 0
+        for result in results:
+            final_result += result
+        cur.execute("INSERT INTO results(quiz_id, correct_answers, number_of_questions) VALUES(?, ?, ?)",
+                    [pk, final_result, number_of_questions])
+        con.commit()
+        con.close()
+
+    @staticmethod
+    def results_as_list(results):
+        values = []
+        for result in results:
+            correct_answers = result[0]
+            number_of_questions = result[1]
+            quiz = result[3]
+            module = result[5]
+            result = '%s / %s' % (correct_answers, number_of_questions)
+            value = [result, quiz, module]
+            values.append(value)
+        return values
+
+    @staticmethod
+    def get_results():
+        con = sqlite3.connect('question_bank.db')
+        cur = con.cursor()
+        cur.execute("""SELECT results.correct_answers, 
+        results.number_of_questions, results.quiz_id, 
+        quizes.name, quizes.module_id, modules.name
+        FROM results, quizes, modules
+        WHERE results.quiz_id=quizes.id
+        AND quizes.module_id=modules.id
+        """)
+        con.commit()
+        results = cur.fetchall()
+        con.close()
+        results = Custom.results_as_list(results)
+        return results
+
+    @staticmethod
+    def delete_all_results():
+        con = sqlite3.connect('question_bank.db')
+        cur = con.cursor()
+        cur.execute("DELETE FROM results")
+        con.commit()
+        con.close()
+
+    @staticmethod
+    def generic_refresh(values, tree):
+        """
+        Delete everything and do a query and insert them over again
+        """
+        tree.delete_everything()
+        for value in values:
+            arg = list(value)
+            tree.insert_args(arg)
+
+    @staticmethod
+    def delete_element(_list, index):
+        copy = _list
+        element = _list[index]
+        copy.remove(element)
+        return copy
+
+    @staticmethod
+    def replace_elements(_list, current_element, desired_element):
+        copy = []
+        for element in _list:
+            if element == current_element:
+                copy.append(desired_element)
+            else:
+                copy.append(element)
+        return copy
+
+    @staticmethod
+    def del_first_and_last(_list):
+        _list = _list[:-1]
+        _list = _list[1:]
+        return _list

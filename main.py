@@ -1,6 +1,5 @@
 from objects import *
 from generic_widgets import *
-from db import *
 
 register_module = None
 register_quiz = None
@@ -8,14 +7,60 @@ register_question = None
 register_answer = None
 
 
+class App(Tk):
+    def __init__(self):
+        super().__init__()
+        self.height = 600
+        self.title("Quiz App")
+        self.start_geom = "900x600"
+        self.geometry(self.start_geom)
+        Custom.create()
+
+    def adjust_height(self, number):
+        self.geometry("900x%s" % number)
+
+    def go_back_to_start_geom(self):
+        self.geometry(self.start_geom)
+
+
+root = App()
+
+
+class StartPage(Frame):
+    def __init__(self, master):
+        Frame.__init__(self, master)
+        self.master = master
+        take_a_quiz = Button(self, text="Take a Quiz!", command=self.take, height=8, width=60)
+        see_your_previous_results = Button(self, text="See your previous results", command=self.previous_results, height=8,
+                                           width=60)
+        add_and_edit_your_quizzes = Button(self, text="Add and edit your quizes", command=self.edit_and_add, height=8, width=60)
+        take_a_quiz.pack(pady=30)
+        see_your_previous_results.pack(pady=30)
+        add_and_edit_your_quizzes.pack(pady=30)
+
+    def take(self):
+        Listview(root).pack()
+        self.pack_forget()
+
+    def previous_results(self):
+        PreviousResults(root).pack()
+        self.pack_forget()
+
+    def edit_and_add(self):
+        module_page.pack()
+        self.pack_forget()
+
+
+start = StartPage(root)
+start.pack(fill=BOTH, expand=True)
+
+
 class UpdateAddModule(Toplevel):
     def __init__(self, title, item=None):
         Toplevel.__init__(self)
         self.title(title)
         self.geometry('600x600')
-
         self.item = item
-
         if self.item is None:
             txt = "add"
         else:
@@ -42,7 +87,7 @@ class UpdateAddModule(Toplevel):
             is_saved = module.update(pk=module_id)
         if not is_saved:
             self.raise_message()
-        start_page.refresh()
+        module_page.refresh()
         self.destroy()
 
 
@@ -59,7 +104,8 @@ class ModulePage(Frame):
         self.refresh()
 
     def back(self):
-        self.destroy()
+        start.pack()
+        self.pack_forget()
 
     def add(self):
         title = "Add a module"
@@ -74,7 +120,7 @@ class ModulePage(Frame):
     def refresh(self):
         tree = self.tree
         values = Module().refresh()
-        generic_refresh(values, tree)
+        Custom.generic_refresh(values, tree)
 
     def edit(self):
         item = self.tree.selected_item()
@@ -152,7 +198,7 @@ class QuizPage(Frame):
         self.buttons.pack(side=BOTTOM, fill=X)
 
     def back(self):
-        start_page.pack(fill=BOTH, expand=True)
+        module_page.pack(fill=BOTH, expand=True)
         self.pack_forget()
 
     def add(self):
@@ -182,16 +228,16 @@ class QuizPage(Frame):
             values = []
             for result in results:
                 result_in_list = list(result)
-                copy = del_first_and_last(result_in_list)
+                copy = Custom.del_first_and_last(result_in_list)
                 if copy[1]:
                     desired_element = 'Randomized'
                 else:
                     desired_element = 'Not Randomized'
 
-                copy = replace_elements(copy, copy[1], desired_element)
+                copy = Custom.replace_elements(copy, copy[1], desired_element)
                 copy = list(copy)
                 values.append(copy)
-            generic_refresh(values, self.tree)
+            Custom.generic_refresh(values, self.tree)
 
     def edit(self):
         item = self.tree.selected_item()
@@ -211,9 +257,9 @@ class QuizPage(Frame):
         self.tree.delete(item)
 
         if carry_item[1] == "Randomized":
-            carry_item = replace_elements(carry_item, "Randomized", 1)
+            carry_item = Custom.replace_elements(carry_item, "Randomized", 1)
         else:
-            carry_item = replace_elements(carry_item, "Not Randomized", 0)
+            carry_item = Custom.replace_elements(carry_item, "Not Randomized", 0)
         Quiz(name=carry_item[0], israndomized=carry_item[1]).delete(register_module)
 
 
@@ -321,12 +367,12 @@ class QuestionPage(Frame):
             values = []
             for result in results:
                 result_in_list = list(result)
-                copy = del_first_and_last(result_in_list)
+                copy = Custom.del_first_and_last(result_in_list)
                 copy = list(copy)
                 question_type = self.get_question_type(copy[1])
-                copy = replace_elements(copy, copy[1], question_type)
+                copy = Custom.replace_elements(copy, copy[1], question_type)
                 values.append(copy)
-            generic_refresh(values, self.tree)
+            Custom.generic_refresh(values, self.tree)
 
     def edit(self):
         question = self.get_selected_question()
@@ -440,13 +486,13 @@ class AnswerPage(Frame):
             values = []
             for result in results:
                 result_in_list = list(result)
-                copy = del_first_and_last(result_in_list)
+                copy = Custom.del_first_and_last(result_in_list)
                 if copy[1]:
-                    copy = replace_elements(copy, copy[1], "True")
+                    copy = Custom.replace_elements(copy, copy[1], "True")
                 else:
-                    copy = replace_elements(copy, copy[1], "False")
+                    copy = Custom.replace_elements(copy, copy[1], "False")
                 values.append(copy)
-            generic_refresh(values, self.tree)
+            Custom.generic_refresh(values, self.tree)
 
     def delete(self):
         item = self.tree.selected_item()
@@ -466,17 +512,152 @@ class AnswerPage(Frame):
         answer.delete(register_question, register_quiz, register_module)
 
 
-class App(Tk):
-    def __init__(self):
-        super().__init__()
-        self.title("Quiz App")
-        self.geometry("900x600")
-        create()
+class PreviousResults(Frame):
+    def __init__(self, master):
+        Frame.__init__(self, master)
+        self.master = master
+        self.values = []
+        self.tree = GenericTree(self, {'result': 'Result', 'quiz': 'Quiz', 'module': 'Module'})
+        self.tree.pack()
+        self.refresh()
+        btn = TakeQuizButtons(self, self.press, self.delete_result, txt="Delete All Results")
+        btn.pack()
+
+    def press(self):
+        start.pack()
+        root.go_back_to_start_geom()
+        self.pack_forget()
+
+    def refresh(self):
+        self.values = Custom.get_results()
+        Custom.generic_refresh(self.values, self.tree)
+
+    def delete_result(self):
+        Custom.delete_all_results()
+        self.refresh()
 
 
-root = App()
-start_page = ModulePage(master=root)
-start_page.pack(fill=BOTH, expand=True)
+class ResultPage(Frame):
+    def __init__(self, master, results, why_iscorrect):
+        Frame.__init__(self, master)
+        self.master = master
+        self.results = results
+        self.why_iscorrect = why_iscorrect
+        Results(self, self.results, self.why_iscorrect).pack(fill=BOTH, expand=True)
+
+    def exit(self):
+        Listview(root).pack(fill=BOTH, expand=True)
+        root.go_back_to_start_geom()
+        self.pack_forget()
+
+
+class AnswerView(Frame):
+    def __init__(self, master, questions, quiz_id):
+        Frame.__init__(self, master)
+        self.master = master
+        self.questions = questions
+        self.question_index = 0
+        self.quiz_id = quiz_id
+        self.why_iscorrect = []
+        self.question = self.questions[self.question_index]
+        self.results = []
+
+        self.btn = AnswersAndLabel(master=self, question=self.question)
+        self.btn.pack()
+
+    def next_question(self, iscorrect, why_iscorrect):
+        self.results.append(iscorrect)
+        self.btn.pack_forget()
+        self.why_iscorrect.append(why_iscorrect)
+        is_end = self.question_index == len(self.questions)-1
+        if is_end:
+            self.go_to_results_page()
+        else:
+            self.add_new_question()
+
+    def go_to_results_page(self):
+        Custom.add_results(self.results, self.quiz_id)
+        ResultPage(root, self.results, self.why_iscorrect).pack(fill=BOTH, expand=1)
+        self.pack_forget()
+
+    def add_new_question(self):
+        self.increment()
+        self.btn = AnswersAndLabel(self, self.question)
+        self.btn.pack()
+
+    def increment(self):
+        self.question_index += 1
+        self.question = self.questions[self.question_index]
+
+    def adjust_height(self, number):
+        number *= 180
+        self.master.adjust_height(number)
+
+
+class Listview(Frame):
+    def __init__(self, master):
+        Frame.__init__(self, master)
+        self.quiz_id = None
+        self.master = master
+        self.index = 0
+        heads = {'name': 'Quiz name', 'module': 'Module of the quiz', 'israndomized': 'Is quiz Randomized'}
+        self.tree = GenericTree(master=self, dict=heads)
+        self.tree.pack()
+        self.tree.bind("<Double-1>", self.take)
+        buttons = TakeQuizButtons(self, self.back, self.take)
+        buttons.pack()
+        self.refresh()
+
+    @staticmethod
+    def get_status(status):
+        if status == 'Randomized':
+            return 1
+        elif status == 'Not Randomized':
+            return 0
+        else:
+            return status
+
+    def get_selected_module(self):
+        item = self.tree.selected_item()
+        item = self.tree.get_item(item)
+        module = Module(name=item[1])
+        return module
+
+    def get_selected_quiz(self):
+        item = self.tree.selected_item()
+        item = self.tree.get_item(item)
+        quiz = item[0]
+        status = Listview.get_status(item[2])
+        quiz = Quiz(quiz, status)
+        return quiz
+
+    def get_questions_of_selected_quiz(self):
+        quiz = self.get_selected_quiz()
+        module = self.get_selected_module()
+        self.quiz_id = quiz.get_id(module)
+        questions = Question().refresh(self.quiz_id)
+        questions = Question.get_question_with_answers(questions, quiz, module)
+        return questions
+
+    def increment_index(self):
+        self.index += 1
+
+    def take(self):
+        questions = self.get_questions_of_selected_quiz()
+        question_view = AnswerView(root, questions, self.quiz_id)
+        question_view.pack()
+        self.pack_forget()
+
+    def back(self):
+        start.pack()
+        self.pack_forget()
+
+    def refresh(self):
+        results = Quiz.get_quizes_with_modules()
+        Custom.generic_refresh(results, self.tree)
+
+
+module_page = ModulePage(master=root)
 quiz_page = QuizPage(master=root)
 question_page = QuestionPage(master=root)
 answer_page = AnswerPage(master=root)
