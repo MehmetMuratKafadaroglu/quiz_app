@@ -2,6 +2,9 @@ import unittest
 import objects
 import os
 
+"""
+Test file exist for test purposes and to insert data to database for examples.
+"""
 
 class TestObjects(unittest.TestCase):
     def setUp(self):

@@ -1,5 +1,12 @@
 import sqlite3
 
+"""
+Objects file is a file that retrives, deletes, edit data from/to main.
+This file makes queries and put them to python objects when data is required.
+When data needs to be edited, deleted or saved objects are initialised in main file and methods of the class is called
+For instance, if a module needs to be saved module would be initialised and after that save method would be called
+This file should not communicate with generic widgets file. This file should only communicate with main file.
+"""
 
 # This is an abstract class. This class is just there to give other classes certain database related methods.
 class Base:

@@ -2,6 +2,14 @@ from objects import *
 from generic_widgets import *
 import random
 
+""""
+Main file where we put everything together.
+This file takes the data from objects and takes the UI widgets from generic widgets.
+This file is the file where things are put together.
+Also main should not communicate with database directly if data needs to be inserted/manipulated this file 
+should communicate with objects file.
+"""
+
 register_module = None
 register_quiz = None
 register_question = None

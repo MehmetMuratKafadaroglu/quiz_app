@@ -1,6 +1,10 @@
 from tkinter import *
 from tkinter.ttk import Combobox, Treeview
-
+"""
+Generic widgets gives generic widgets and functions to main file.
+This file exist to decrease the duplication in main file.
+This file should not communicate with database/objects this file should only communicate with the main file
+"""
 
 def generic_refresh(values, tree):
     """
