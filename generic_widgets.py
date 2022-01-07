@@ -99,8 +99,12 @@ class GenericTree(Frame):
         return values
 
     def selected_item(self):
-        selected_item = self.tree.selection()[0]
-        return selected_item
+        try:
+            selected_item = self.tree.selection()[0]
+            return selected_item
+        except:
+            print("User did not choose anything this is not an error")
+            return None
 
     def get_item(self, pk):
         return self.tree.item(pk)['values']
@@ -163,12 +167,12 @@ class AnswersAndLabel(Frame):
     def __init__(self, master, question):
         Frame.__init__(self, master)
         self.master = master
-        self.answers = question.get_answers()
+        self.answers = question.answers
         length = len(self.answers)
         button_width = 120 / length
         button_width = int(button_width)
 
-        Label(self, text=question.get_question(), height=8, relief='solid', width=100).grid(row=0, column=0, pady=10)
+        Label(self, text=question.question, height=8, relief='solid', width=100).grid(row=0, column=0, pady=10)
         for i in range(length):
             answer = self.answers[i]
             AnswerButton(self, answer, button_width).grid(row=i + 1, column=0, pady=10)
@@ -182,9 +186,9 @@ class AnswerButton(Frame):
     def __init__(self, master, answer, btn_width):
         Frame.__init__(self, master)
         self.master = master
-        self.status = answer.get_iscorrect()
-        self.description = answer.get_description()
-        self.why_iscorrect = answer.get_why_iscorrect()
+        self.status = answer.iscorrect
+        self.description = answer.description
+        self.why_iscorrect = answer.why_iscorrect
         self.btn = Button(self, text=self.description, width=btn_width, command=self.press, height=5)
         self.btn.pack(fill=BOTH, expand=1)
 

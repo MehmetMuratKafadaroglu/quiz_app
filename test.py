@@ -86,10 +86,6 @@ because of Turing machine""")
         os.remove('question_bank.db')
         """
 
-    def test_name(self):
-        self.assertIsNotNone(self.test_module.get_name())
-        self.assertIsNotNone(self.test_quiz.get_name())
-
     def test_save(self):
         self.assertIsNotNone(self.is_saved)
         self.assertIsNotNone(self.is_quiz_saved)
@@ -120,7 +116,7 @@ because of Turing machine""")
         self.assertIsInstance(questions, list)
         for question in questions:
             self.assertIsInstance(question, objects.Question)
-            for answer in question.get_answers():
+            for answer in question.answers:
                 self.assertIsInstance(answer, objects.Answer)
 
 

@@ -32,9 +32,11 @@ class StartPage(Frame):
         Frame.__init__(self, master)
         self.master = master
         take_a_quiz = Button(self, text="Take a Quiz!", command=self.take, height=8, width=60)
-        see_your_previous_results = Button(self, text="See your previous results", command=self.previous_results, height=8,
+        see_your_previous_results = Button(self, text="See your previous results", command=self.previous_results,
+                                           height=8,
                                            width=60)
-        add_and_edit_your_quizzes = Button(self, text="Add and edit your quizes", command=self.edit_and_add, height=8, width=60)
+        add_and_edit_your_quizzes = Button(self, text="Add and edit your quizes", command=self.edit_and_add, height=8,
+                                           width=60)
         take_a_quiz.pack(pady=30)
         see_your_previous_results.pack(pady=30)
         add_and_edit_your_quizzes.pack(pady=30)
@@ -125,6 +127,8 @@ class ModulePage(Frame):
 
     def edit(self):
         item = self.tree.selected_item()
+        if item is None:
+            return
         item = self.tree.get_item(item)
         item = item[0]
         module = Module(name=item)
@@ -229,21 +233,18 @@ class QuizPage(Frame):
             values = []
             for result in results:
                 result_in_list = list(result)
-                copy = Custom.del_first_and_last(result_in_list)
+                copy = del_first_and_last(result_in_list)
                 if copy[1]:
                     desired_element = 'Randomized'
                 else:
                     desired_element = 'Not Randomized'
 
-                copy = Custom.replace_elements(copy, copy[1], desired_element)
+                copy = replace_elements(copy, copy[1], desired_element)
                 copy = list(copy)
                 values.append(copy)
-            Custom.generic_refresh(values, self.tree)
+            generic_refresh(values, self.tree)
 
     def edit(self):
-        item = self.tree.selected_item()
-        item = self.tree.get_item(item)
-
         quiz = self.get_selected_quiz()
         global register_quiz
         register_quiz = quiz
@@ -258,9 +259,9 @@ class QuizPage(Frame):
         self.tree.delete(item)
 
         if carry_item[1] == "Randomized":
-            carry_item = Custom.replace_elements(carry_item, "Randomized", 1)
+            carry_item = replace_elements(carry_item, "Randomized", 1)
         else:
-            carry_item = Custom.replace_elements(carry_item, "Not Randomized", 0)
+            carry_item = replace_elements(carry_item, "Not Randomized", 0)
         Quiz(name=carry_item[0], israndomized=carry_item[1]).delete(register_module)
 
 
@@ -368,12 +369,12 @@ class QuestionPage(Frame):
             values = []
             for result in results:
                 result_in_list = list(result)
-                copy = Custom.del_first_and_last(result_in_list)
+                copy = del_first_and_last(result_in_list)
                 copy = list(copy)
                 question_type = self.get_question_type(copy[1])
-                copy = Custom.replace_elements(copy, copy[1], question_type)
+                copy = replace_elements(copy, copy[1], question_type)
                 values.append(copy)
-            Custom.generic_refresh(values, self.tree)
+            generic_refresh(values, self.tree)
 
     def edit(self):
         question = self.get_selected_question()
@@ -570,7 +571,7 @@ class AnswerView(Frame):
         self.results.append(iscorrect)
         self.btn.pack_forget()
         self.why_iscorrect.append(why_iscorrect)
-        is_end = self.question_index == len(self.questions)-1
+        is_end = self.question_index == len(self.questions) - 1
         if is_end:
             self.go_to_results_page()
         else:
@@ -645,9 +646,7 @@ class Listview(Frame):
         quiz = self.get_selected_quiz()
         module = self.get_selected_module()
         questions = self.get_questions_of_selected_quiz(quiz, module)
-
-        is_randomized = quiz.get_randomisation_status()
-        if is_randomized:
+        if quiz.israndomized:
             random.shuffle(questions)
         question_view = AnswerView(root, questions, self.quiz_id)
         question_view.pack()

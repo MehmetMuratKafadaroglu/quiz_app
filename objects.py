@@ -156,35 +156,32 @@ class Base:
 # This is module. Modules are related to quizzes
 class Module(Base):
     def __init__(self, name=None, quizes=None):
-        self.name = name
-        self.quizes = quizes
+        self._name = name
+        self._quizes = quizes
         self.table_name = "modules"
         self.columns = ["name"]
 
-    def get_name(self):
-        return self.name
+    @property
+    def name(self):
+        return self._name
 
-    def set_name(self, module_name):
-        self.name = module_name
+    @name.setter
+    def name(self, name):
+        self._name = name
 
-    def get_quizes(self):
-        return self.quizes
+    @property
+    def quizes(self):
+        return self._quizes
 
-    def set_quiz(self, *quizes):
-        if self.quizes is None:
-            self.quizes = []
-        for quiz in quizes:
-            self.quizes.append(quiz)
-
-    def get_quiz_names(self):
-        if self.quizes is None:
-            return None
+    @quizes.setter
+    def quizes(self, *quizes):
+        if self._quizes is None:
+            self._quizes = []
+        if type(quizes[0]) == list:
+            self.quizes = quizes[0]
         else:
-            quiz_names = []
-            for quiz in self.quizes:
-                name = quiz.get_name()
-                quiz_names.append(name)
-            return quiz_names
+            for quiz in quizes:
+                self.quizes.append(quiz)
 
     def save(self):
         name = self.name
@@ -220,35 +217,34 @@ class Module(Base):
 # The quiz can have selected questions or questions can be randomized
 class Quiz(Base):
     def __init__(self, name=None, israndomized=False, questions=None):
-        self.name = name
-        self.questions = questions
-        self.israndomized = israndomized
+        self._name = name
+        self._questions = questions
+        self._israndomized = israndomized
         self.table_name = "quizes"
         self.columns = ["name", "is_randomized", "module_id"]
 
-        if self.questions is not None:
-            for question in self.questions:
-                assert question is Question
+    @property
+    def name(self):
+        return self._name
 
-    def get_name(self):
-        return self.name
+    @name.setter
+    def name(self, quiz_name):
+        self._name = quiz_name
 
-    def set_name(self, quiz_name):
-        self.name = quiz_name
+    @property
+    def questions(self):
+        return self._questions
 
-    def get_questions(self):
-        return self.questions
+    @questions.setter
+    def questions(self, questions):
+       self._questions = questions
 
-    def set_question(self, *questions):
-        if self.questions is None:
-            self.questions = []
-        for question in questions:
-            self.questions.append(question)
+    @property
+    def israndomized(self):
+        return self._israndomized
 
-    def get_randomisation_status(self):
-        return self.israndomized
-
-    def set_randomisation_status(self, status):
+    @israndomized.setter
+    def israndomized(self, status):
         self.israndomized = status
 
     @staticmethod
@@ -306,47 +302,35 @@ class Quiz(Base):
 # Every question needs a text. question parameter stands for the question itself.
 class Question(Base):
     def __init__(self, question=None, question_type=None, answers=None):
-        self.question = question
-        self.question_type = question_type
-        self.right_answers = []
-        self.answers = answers
+        self._question = question
+        self._question_type = question_type
+        self._answers = answers
         self.table_name = "questions"
         self.columns = ["question", "question_type", "quiz_id"]
 
-        if answers is not None:
-            for answer in answers:
-                if answer.iscorrect:
-                    self.right_answers.append(answer)
+    @property
+    def answers(self):
+        return self._answers
 
-        assert type(self.answers) is list or type(self.answers) is tuple or self.answers is None
+    @answers.setter
+    def answers(self, answers):
+        self._answers = answers
 
-        if answers is not None:
-            assert len(self.right_answers), "There must be an at least one right answer"
-            for answer, right_answer in self.answers, self.right_answers:
-                assert type(answer) is Answer and type(right_answer) is Answer
-            assert len(self.right_answers) != len(answers), 'Every answer cannot be correct.' \
-                                                            ' Some of them must be wrong'
+    @property
+    def question(self):
+        return self._question
 
-    def get_answers(self):
-        return self.answers
+    @question.setter
+    def question(self, question_itself):
+        self._question = question_itself
 
-    def set_answers(self, answers):
-        self.answers = answers
+    @property
+    def question_type(self):
+        return self._question_type
 
-    def set_answer(self, *answers):
-        if self.answers is None:
-            self.answers = []
-        for answer in answers:
-            self.answers.append(answer)
-
-    def get_question(self):
-        return self.question
-
-    def set_question(self, question_itself):
-        self.question = question_itself
-
-    def get_right_answers(self):
-        return self.right_answers
+    @question_type.setter
+    def question_type(self, question_type):
+        self._question_type = question_type
 
     def save(self, quiz, module):
         question = self.question
@@ -405,36 +389,42 @@ class Question(Base):
             pk = question.get_id(quiz, module)
             answers = Answer().refresh(foreign_key=pk)
             copy = Answer.auto_init(answers)
-            question.set_answers(copy)
+            question.answers = copy
             final.append(question)
         return final
 
 # This is the answer of a question. Answers are related to modules
 class Answer(Base):
     def __init__(self, description=None, iscorrect=None, why_iscorrect=None):
-        self.description = description
-        self.iscorrect = iscorrect
-        self.why_iscorrect = why_iscorrect
+        self._description = description
+        self._iscorrect = iscorrect
+        self._why_iscorrect = why_iscorrect
         self.table_name = "answers"
         self.columns = ["description", "iscorrect", "why_iscorrect", "question_id"]
 
-    def get_description(self):
-        return self.description
+    @property
+    def description(self):
+        return self._description
 
-    def set_description(self, answer_description):
-        self.description = answer_description
+    @description.setter
+    def description(self, answer_description):
+        self._description = answer_description
 
-    def get_iscorrect(self):
-        return self.iscorrect
+    @property
+    def iscorrect(self):
+        return self._iscorrect
 
-    def set_iscorrect(self, answer_iscorrect):
-        self.iscorrect = answer_iscorrect
+    @iscorrect.setter
+    def iscorrect(self, answer_iscorrect):
+        self._iscorrect = answer_iscorrect
 
-    def get_why_iscorrect(self):
-        return self.why_iscorrect
+    @property
+    def why_iscorrect(self):
+        return self._why_iscorrect
 
-    def set_why_iscorrect(self, answer_why_iscorrect):
-        self.why_iscorrect = answer_why_iscorrect
+    @why_iscorrect.setter
+    def why_iscorrect(self, answer_why_iscorrect):
+        self._why_iscorrect = answer_why_iscorrect
 
     def save(self, question, quiz, module):
         description, iscorrect, why_iscorrect = self.description, self.iscorrect, self.why_iscorrect
