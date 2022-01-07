@@ -120,7 +120,7 @@ class ModulePage(Frame):
     def refresh(self):
         tree = self.tree
         values = Module().refresh()
-        Custom.generic_refresh(values, tree)
+        generic_refresh(values, tree)
 
     def edit(self):
         item = self.tree.selected_item()
@@ -486,13 +486,13 @@ class AnswerPage(Frame):
             values = []
             for result in results:
                 result_in_list = list(result)
-                copy = Custom.del_first_and_last(result_in_list)
+                copy = del_first_and_last(result_in_list)
                 if copy[1]:
-                    copy = Custom.replace_elements(copy, copy[1], "True")
+                    copy = replace_elements(copy, copy[1], "True")
                 else:
-                    copy = Custom.replace_elements(copy, copy[1], "False")
+                    copy = replace_elements(copy, copy[1], "False")
                 values.append(copy)
-            Custom.generic_refresh(values, self.tree)
+            generic_refresh(values, self.tree)
 
     def delete(self):
         item = self.tree.selected_item()
@@ -530,7 +530,7 @@ class PreviousResults(Frame):
 
     def refresh(self):
         self.values = Custom.get_results()
-        Custom.generic_refresh(self.values, self.tree)
+        generic_refresh(self.values, self.tree)
 
     def delete_result(self):
         Custom.delete_all_results()
@@ -654,7 +654,7 @@ class Listview(Frame):
 
     def refresh(self):
         results = Quiz.get_quizes_with_modules()
-        Custom.generic_refresh(results, self.tree)
+        generic_refresh(results, self.tree)
 
 
 module_page = ModulePage(master=root)

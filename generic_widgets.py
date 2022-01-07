@@ -2,6 +2,35 @@ from tkinter import *
 from tkinter.ttk import Combobox, Treeview
 
 
+def generic_refresh(values, tree):
+    """
+    Delete everything and do a query and insert them over again
+    """
+    tree.delete_everything()
+    for value in values:
+        arg = list(value)
+        tree.insert_args(arg)
+
+def delete_element(_list, index):
+    copy = _list
+    element = _list[index]
+    copy.remove(element)
+    return copy
+
+def replace_elements(_list, current_element, desired_element):
+    copy = []
+    for element in _list:
+        if element == current_element:
+            copy.append(desired_element)
+        else:
+            copy.append(element)
+    return copy
+
+def del_first_and_last(_list):
+    _list = _list[:-1]
+    _list = _list[1:]
+    return _list
+
 # This is InputField class. This class gives label and text together.
 class InputField(Frame):
     def __init__(self, master, text, side=TOP):
