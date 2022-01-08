@@ -13,7 +13,7 @@ class TestObjects(unittest.TestCase):
         self.test_module = objects.Module("Paradigms of Programming")
         self.is_saved = self.test_module.save()
         self.module_id = self.test_module.get_id()
-
+        
         self.test_quiz = objects.Quiz("General Computer Science Quiz", True)
         self.is_quiz_saved = self.test_quiz.save(self.test_module)
         self.quiz_id = self.test_quiz.get_id(self.test_module)
@@ -84,10 +84,10 @@ because of Turing machine""")
         self.test_question5_answer4.save(self.test_question5, self.test_quiz, self.test_module)
         self.test_question5_answer5.save(self.test_question5, self.test_quiz, self.test_module)
         self.test_question5_answer6.save(self.test_question5, self.test_quiz, self.test_module)
-
-    """def tearDown(self):
-        os.remove('question_bank.db')
-        """
+    """
+    def tearDown(self):
+        os.remove('question_bank.db')"""
+        
 
     def test_save(self):
         self.assertIsNotNone(self.is_saved)

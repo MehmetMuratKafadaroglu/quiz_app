@@ -17,6 +17,37 @@ class Base:
         if type(self) is Base:
             raise NotImplementedError("This is an abstract class and cannot be instantiated")
         assert type(self.table_name) is str and type(self.columns) is list or type(self.columns) is tuple
+    
+    @staticmethod
+    def loop(values, index, sql_code):
+        """
+        There is no need for this function I added this for exercise purposes
+        """
+        val = values[index]
+        index += 1
+        try:
+            int(val)
+            sql_code +="{},".format(val)
+        except:
+            sql_code +="'{}',".format(val)
+        if index >= len(values):
+            return sql_code
+        return Base.loop(values, index, sql_code)
+
+    @staticmethod
+    def where_loop(values, columns ,index, sql_code):
+        val = values[index]
+        col = columns[index]
+        index += 1
+        try:
+            int(val)
+            sql_code +="{}={}".format(col, val)
+        except:
+            sql_code +="{}='{}'".format(col, val)
+        if index >= len(values):
+            return sql_code
+        sql_code += ' AND '
+        return Base.where_loop(values, columns ,index, sql_code)
 
     def save(self, *values):
         """
@@ -28,37 +59,18 @@ class Base:
         cur = con.cursor()
 
         for value in values:
-            if value is None or value == '':
+            if value == '':
                 return False
 
         sql_code = "INSERT OR IGNORE INTO " + self.table_name + "("
-        last_element = self.columns[len(self.columns) - 1]
-
         for column in self.columns:
-            if column == last_element:
-                sql_code = sql_code + column
-            else:
-                sql_code = sql_code + column + ","
+            sql_code = sql_code + column + ","
 
-        sql_code = sql_code + ") VALUES("
-
-        val_length = len(values)
-        i = 0
-        while i < val_length:
-            value = values[i]
-            if i == val_length - 1:
-                try:
-                    int(value)
-                    sql_code = sql_code + "%s);" % value
-                except:
-                    sql_code = sql_code + "'%s');" % value
-            else:
-                try:
-                    int(value)
-                    sql_code = sql_code + "%s," % value
-                except:
-                    sql_code = sql_code + "'%s'," % value
-            i += 1
+        sql_code = sql_code[:-1]
+        sql_code +=") VALUES("
+        sql_code = Base.loop(values, 0, sql_code)
+        sql_code = sql_code[:-1]
+        sql_code += ');'
         cur.execute(sql_code)
         con.commit()
         con.close()
@@ -72,20 +84,8 @@ class Base:
         """
         con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
-        value_length = len(values)
         sql_code = "DELETE FROM " + self.table_name + " WHERE "
-        i = 0
-        while i < value_length:
-            column, value = self.columns[i], values[i]
-            try:
-                int(value)
-                sql_code += "%s=%s" % (column, value)
-            except:
-                sql_code += "%s='%s'" % (column, value)
-            is_end_of_query = i == value_length - 1
-            if not is_end_of_query:
-                sql_code += " AND "
-            i += 1
+        sql_code = Base.where_loop(values, self.columns, 0, sql_code)
         cur.execute(sql_code)
         con.commit()
         con.close()
@@ -95,22 +95,8 @@ class Base:
         Get id method builds a sql syntax just like other methods.After an object 
         initialised and saved. Object's id can be taken from the database with this method.
         """
-        value_length = len(values)
-        query = "SELECT id FROM " + self.table_name + " WHERE "
-        i = 0
-
-        while i < value_length:
-            column, value = self.columns[i], values[i]
-            try:
-                int(value)
-                query = query + "%s=%s" % (column, value)
-            except:
-                query = query + "%s='%s'" % (column, value)
-
-            is_end_of_query = (i == value_length - 1)
-            if not is_end_of_query:
-                query += " AND "
-            i += 1
+        query = "SELECT id FROM " + self.table_name + " WHERE "        
+        query = Base.where_loop(values, self.columns, 0, query)
         con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
         cur.execute(query)
@@ -126,7 +112,7 @@ class Base:
         """
         con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
-        query = "SELECT * FROM %s WHERE %s=%s" % (self.table_name, foreign_key_column, foreign_key)
+        query = "SELECT * FROM {} WHERE {}={}".format(self.table_name, foreign_key_column, foreign_key)
         cur.execute(query)
         results = cur.fetchall()
         con.close()
@@ -137,7 +123,7 @@ class Base:
         This is a general update statement. This updates all the places that is given in the dictionary.
         """
         table_name = self.table_name
-        sql_code = "UPDATE %s SET " % (table_name)
+        sql_code = "UPDATE {} SET ".format(table_name)
 
         for item in kwargs.items():
             column = item[0]
@@ -146,12 +132,12 @@ class Base:
                 return False
             try:
                 int(value)
-                sql_code += "%s=%d," % (column, value)
+                sql_code += "{}={},".format(column, value)
             except:
-                sql_code += "%s='%s'," % (column, value)
+                sql_code += "{}='{}',".format(column, value)
 
         sql_code = sql_code[:-1]
-        sql_code += " WHERE id=%d " % pk
+        sql_code += " WHERE id={} ".format(pk)
         con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
         cur.execute(sql_code)
