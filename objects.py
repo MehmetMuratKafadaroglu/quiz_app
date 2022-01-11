@@ -18,26 +18,12 @@ class Base:
             raise NotImplementedError("This is an abstract class and cannot be instantiated")
         assert type(self.table_name) is str and type(self.columns) is list or type(self.columns) is tuple
 
-    @staticmethod
-    def loop(values, index, sql_code):
+    def where_loop(self, values, sql_code, index=0):
         """
-        There is no need for this function I added this for exercise purposes
+        This method produces part of the sql code that is after where
         """
         val = values[index]
-        index += 1
-        try:
-            int(val)
-            sql_code +="{},".format(val)
-        except:
-            sql_code +="'{}',".format(val)
-        if index >= len(values):
-            return sql_code
-        return Base.loop(values, index, sql_code)
-
-    @staticmethod
-    def where_loop(values, columns ,index, sql_code):
-        val = values[index]
-        col = columns[index]
+        col = self.columns[index]
         index += 1
         try:
             int(val)
@@ -47,7 +33,7 @@ class Base:
         if index >= len(values):
             return sql_code
         sql_code += ' AND '
-        return Base.where_loop(values, columns ,index, sql_code)
+        return self.where_loop(values, sql_code, index=index)
 
     def save(self, *values):
         """
@@ -67,7 +53,12 @@ class Base:
 
         sql_code = sql_code[:-1]
         sql_code +=") VALUES("
-        sql_code = Base.loop(values, 0, sql_code)
+        for val in values:
+            try:
+                int(val)
+                sql_code +="{},".format(val)
+            except:
+                sql_code +="'{}',".format(val)
         sql_code = sql_code[:-1]
         sql_code += ');'
         cur.execute(sql_code)
@@ -84,7 +75,7 @@ class Base:
         con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
         sql_code = "DELETE FROM " + self.table_name + " WHERE "
-        sql_code = Base.where_loop(values, self.columns, 0, sql_code)
+        sql_code = self.where_loop(values, sql_code)
         cur.execute(sql_code)
         con.commit()
         con.close()
@@ -95,7 +86,7 @@ class Base:
         initialised and saved. Object's id can be taken from the database with this method.
         """
         query = "SELECT id FROM " + self.table_name + " WHERE "        
-        query = Base.where_loop(values, self.columns, 0, query)
+        query = self.where_loop(values, query)
         con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
         cur.execute(query)
