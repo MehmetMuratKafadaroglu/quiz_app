@@ -11,13 +11,13 @@ This file should not communicate with generic widgets file. This file should onl
 # This is an abstract class. This class is just there to give other classes certain database related methods.
 class Base:
     def __init__(self):
-        self.table_name = ""
-        self.columns = []
+        self.__table_name = ""
+        self.__columns = []
 
         if type(self) is Base:
             raise NotImplementedError("This is an abstract class and cannot be instantiated")
         assert type(self.table_name) is str and type(self.columns) is list or type(self.columns) is tuple
-    
+
     @staticmethod
     def loop(values, index, sql_code):
         """
@@ -57,7 +57,6 @@ class Base:
         """
         con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
-
         for value in values:
             if value == '':
                 return False
@@ -151,8 +150,16 @@ class Module(Base):
     def __init__(self, name=None, quizes=None):
         self._name = name
         self._quizes = quizes
-        self.table_name = "modules"
-        self.columns = ["name"]
+        self.__table_name = "modules"
+        self.__columns = ["name"]
+
+    @property
+    def table_name(self):
+        return self.__table_name
+
+    @property
+    def columns(self):
+        return self.__columns
 
     @property
     def name(self):
@@ -213,12 +220,20 @@ class Quiz(Base):
         self._name = name
         self._questions = questions
         self._israndomized = israndomized
-        self.table_name = "quizes"
-        self.columns = ["name", "is_randomized", "module_id"]
+        self.__table_name = "quizes"
+        self.__columns = ["name", "is_randomized", "module_id"]
 
     @property
     def name(self):
         return self._name
+
+    @property
+    def table_name(self):
+        return self.__table_name
+
+    @property
+    def columns(self):
+        return self.__columns
 
     @name.setter
     def name(self, quiz_name):
@@ -298,12 +313,20 @@ class Question(Base):
         self._question = question
         self._question_type = question_type
         self._answers = answers
-        self.table_name = "questions"
-        self.columns = ["question", "question_type", "quiz_id"]
+        self.__table_name = "questions"
+        self.__columns = ["question", "question_type", "quiz_id"]
 
     @property
     def answers(self):
         return self._answers
+
+    @property
+    def table_name(self):
+        return self.__table_name
+
+    @property
+    def columns(self):
+        return self.__columns
 
     @answers.setter
     def answers(self, answers):
@@ -392,12 +415,20 @@ class Answer(Base):
         self._description = description
         self._iscorrect = iscorrect
         self._why_iscorrect = why_iscorrect
-        self.table_name = "answers"
-        self.columns = ["description", "iscorrect", "why_iscorrect", "question_id"]
+        self.__table_name = "answers"
+        self.__columns = ["description", "iscorrect", "why_iscorrect", "question_id"]
 
     @property
     def description(self):
         return self._description
+
+    @property
+    def table_name(self):
+        return self.__table_name
+
+    @property
+    def columns(self):
+        return self.__columns
 
     @description.setter
     def description(self, answer_description):
