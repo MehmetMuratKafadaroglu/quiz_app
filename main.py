@@ -396,7 +396,8 @@ class QuestionPage(Frame):
         item = self.tree.selected_item()
         carry_item = self.tree.get_item(item)
         self.tree.delete(item)
-        Question(question=carry_item[0]).delete(register_quiz, register_module)
+        question_type = carry_item[1]
+        Question(question=carry_item[0], question_type=question_type).delete(register_quiz, register_module)
 
 
 class UpdateAddAnswers(Toplevel):

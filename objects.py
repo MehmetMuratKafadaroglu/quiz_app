@@ -8,6 +8,7 @@ For instance, if a module needs to be saved module would be initialised and afte
 This file should not communicate with generic widgets file. This file should only communicate with main file.
 """
 
+
 # This is an abstract class. This class is just there to give other classes certain database related methods.
 class Base:
     def __init__(self):
@@ -18,22 +19,16 @@ class Base:
             raise NotImplementedError("This is an abstract class and cannot be instantiated")
         assert type(self.table_name) is str and type(self.columns) is list or type(self.columns) is tuple
 
-    def where_loop(self, values, sql_code, index=0):
+    def where_loop(self, sql_code, index=0):
         """
         This method produces part of the sql code that is after where
         """
-        val = values[index]
-        col = self.columns[index]
+        sql_code += self.columns[index] + "=?"
         index += 1
-        try:
-            int(val)
-            sql_code +="{}={}".format(col, val)
-        except:
-            sql_code +="{}='{}'".format(col, val)
-        if index >= len(values):
+        if index >= len(self.columns):
             return sql_code
         sql_code += ' AND '
-        return self.where_loop(values, sql_code, index=index)
+        return self.where_loop(sql_code, index=index)
 
     def save(self, *values):
         """
@@ -52,16 +47,14 @@ class Base:
             sql_code = sql_code + column + ","
 
         sql_code = sql_code[:-1]
-        sql_code +=") VALUES("
+        sql_code += ") VALUES("
+
         for val in values:
-            try:
-                int(val)
-                sql_code +="{},".format(val)
-            except:
-                sql_code +="'{}',".format(val)
+            sql_code += '?,'
+
         sql_code = sql_code[:-1]
         sql_code += ');'
-        cur.execute(sql_code)
+        cur.execute(sql_code, values)
         con.commit()
         con.close()
         return True
@@ -75,8 +68,8 @@ class Base:
         con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
         sql_code = "DELETE FROM " + self.table_name + " WHERE "
-        sql_code = self.where_loop(values, sql_code)
-        cur.execute(sql_code)
+        sql_code = self.where_loop(sql_code)
+        cur.execute(sql_code, values)
         con.commit()
         con.close()
 
@@ -85,11 +78,11 @@ class Base:
         Get id method builds a sql syntax just like other methods.After an object 
         initialised and saved. Object's id can be taken from the database with this method.
         """
-        query = "SELECT id FROM " + self.table_name + " WHERE "        
-        query = self.where_loop(values, query)
+        query = "SELECT id FROM " + self.table_name + " WHERE "
+        query = self.where_loop(query)
         con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
-        cur.execute(query)
+        cur.execute(query, values)
         id = cur.fetchone()
         if id is not None:
             id = id[0]
@@ -114,23 +107,20 @@ class Base:
         """
         table_name = self.table_name
         sql_code = "UPDATE {} SET ".format(table_name)
-
+        values = []
         for item in kwargs.items():
             column = item[0]
             value = item[1]
-            if value is None or value == '':
+            if value == '':
                 return False
-            try:
-                int(value)
-                sql_code += "{}={},".format(column, value)
-            except:
-                sql_code += "{}='{}',".format(column, value)
+            values.append(value)
+            sql_code += column + '=?,'
 
         sql_code = sql_code[:-1]
         sql_code += " WHERE id={} ".format(pk)
         con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
-        cur.execute(sql_code)
+        cur.execute(sql_code, values)
         con.commit()
         con.close()
         return True
@@ -236,7 +226,7 @@ class Quiz(Base):
 
     @questions.setter
     def questions(self, questions):
-       self._questions = questions
+        self._questions = questions
 
     @property
     def israndomized(self):
@@ -271,6 +261,7 @@ class Quiz(Base):
         con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
         cur.execute("SELECT * FROM questions WHERE quiz_id="" ")
+
     def save(self, related_class):
         name, israndomized = self.name, self.israndomized
         foreign_key = related_class.get_id()
@@ -328,12 +319,22 @@ class Question(Base):
         return self._question
 
     @question.setter
-    def question(self, question_itself):
-        self._question = question_itself
+    def question(self, question):
+        self._question = question
 
     @property
     def question_type(self):
-        return self._question_type
+        typ = self._question_type
+        if typ in [1, 2, 3]:
+            return typ
+        elif typ == 'Multiple Answer Question':
+            return 1
+        elif typ == 'True False Question':
+            return 2
+        elif typ == 'Best Match Question':
+            return 3
+        else:
+            raise ValueError("Value must be between 1-3")
 
     @question_type.setter
     def question_type(self, question_type):
@@ -350,35 +351,19 @@ class Question(Base):
             return super().save(question, question_type, foreign_key)
 
     def delete(self, related_class, module_class):
-        question = self.question
         foreign_key = related_class.get_id(module_class)
-        return super().delete(question, foreign_key)
-
-    def get_question_type(self):
-        typ = self.question_type
-        if typ in [1, 2, 3]:
-            return typ
-        elif typ == 'Multiple Answer Question':
-            return 1
-        elif typ == 'True False Question':
-            return 2
-        elif typ == 'Best Match Question':
-            return 3
-        else:
-            raise ValueError("Value must be between 1-3")
+        return super().delete(self.question, self.question_type, foreign_key)
 
     def get_id(self, quiz, module):
-        question = self.question
-        question_type = self.get_question_type()
         foreign_key = quiz.get_id(module)
-        return super().get_id(question, question_type, foreign_key)
+        return super().get_id(self.question, self.question_type, foreign_key)
 
     def refresh(self, foreign_key):
         return super().refresh(self.columns[2], foreign_key)
 
     def update(self, quiz, module, old_object):
         pk = old_object.get_id(quiz, module)
-        return super().update(pk, question=self.question, question_type=self.get_question_type())
+        return super().update(pk, question=self.question, question_type=self.question_type)
 
     @staticmethod
     def auto_init(questions):
@@ -399,6 +384,7 @@ class Question(Base):
             question.answers = copy
             final.append(question)
         return final
+
 
 # This is the answer of a question. Answers are related to modules
 class Answer(Base):
@@ -481,6 +467,7 @@ class Answer(Base):
             carry = Answer(description, iscorrect, why_iscorrect)
             values.append(carry)
         return values
+
 
 class Custom:
     @staticmethod
