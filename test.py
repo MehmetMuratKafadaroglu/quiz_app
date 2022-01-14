@@ -122,6 +122,11 @@ because of Turing machine""")
             for answer in question.answers:
                 self.assertIsInstance(answer, objects.Answer)
 
+    def test_results(self):
+        pk = self.quiz_id
+        results = [1, 0, 1, 0, 1, 0, 1, 1]
+        objects.Custom.add_results(results, pk)
+        results = objects.Custom.get_results()
 
 if __name__ == 'main':
     unittest.main()

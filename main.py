@@ -528,7 +528,7 @@ class PreviousResults(Frame):
         Frame.__init__(self, master)
         self.master = master
         self.values = []
-        self.tree = GenericTree(self, {'result': 'Result', 'quiz': 'Quiz', 'module': 'Module'})
+        self.tree = GenericTree(self, {'result': 'Result', 'date': 'Date', 'quiz': 'Quiz', 'module': 'Module'})
         self.tree.pack()
         self.refresh()
         btn = TakeQuizButtons(self, self.press, self.delete_result, txt="Delete All Results")

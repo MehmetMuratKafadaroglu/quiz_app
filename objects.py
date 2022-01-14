@@ -1,5 +1,5 @@
 import sqlite3
-
+import time
 """
 Objects file is a file that retrives, deletes, edit data from/to main.
 This file makes queries and put them to python objects when data is required.
@@ -518,6 +518,7 @@ class Custom:
             quiz_id INTEGER,
             correct_answers INTEGER,
             number_of_questions INTEGER, 
+            date TEXT,
             FOREIGN KEY(quiz_id) REFERENCES quizes(id)
             );
             """)
@@ -533,8 +534,10 @@ class Custom:
         final_result = 0
         for result in results:
             final_result += result
-        cur.execute("INSERT INTO results(quiz_id, correct_answers, number_of_questions) VALUES(?, ?, ?)",
-                    [pk, final_result, number_of_questions])
+        cur.execute("""INSERT INTO results
+        (quiz_id, correct_answers, number_of_questions, date) 
+        VALUES(?, ?, ?, DATETIME('now', 'localtime'))""",
+                    [pk, final_result, number_of_questions, ])
         con.commit()
         con.close()
 
@@ -544,10 +547,11 @@ class Custom:
         for result in results:
             correct_answers = result[0]
             number_of_questions = result[1]
+            date = result[2]
             quiz = result[3]
-            module = result[5]
+            module = result[4]
             result = '%s / %s' % (correct_answers, number_of_questions)
-            value = [result, quiz, module]
+            value = [result, date, quiz, module]
             values.append(value)
         return values
 
@@ -556,8 +560,8 @@ class Custom:
         con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
         cur.execute("""SELECT results.correct_answers, 
-        results.number_of_questions, results.quiz_id, 
-        quizes.name, quizes.module_id, modules.name
+        results.number_of_questions, results.date,
+        quizes.name, modules.name
         FROM results, quizes, modules
         WHERE results.quiz_id=quizes.id
         AND quizes.module_id=modules.id
