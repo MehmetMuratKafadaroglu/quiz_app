@@ -1,3 +1,4 @@
+from http.client import PROXY_AUTHENTICATION_REQUIRED
 from objects import *
 from generic_widgets import *
 import random
@@ -39,15 +40,18 @@ class StartPage(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
         self.master = master
-        take_a_quiz = Button(self, text="Take a Quiz!", command=self.take, height=8, width=60)
+        take_a_quiz = Button(self, text="Take a Quiz!", command=self.take, height=6, width=60)
         see_your_previous_results = Button(self, text="See your previous results", command=self.previous_results,
-                                           height=8,
+                                           height=6,
                                            width=60)
-        add_and_edit_your_quizzes = Button(self, text="Add and edit your quizes", command=self.edit_and_add, height=8,
+        add_and_edit_your_quizzes = Button(self, text="Add and edit your quizes", command=self.edit_and_add, height=6,
                                            width=60)
-        take_a_quiz.pack(pady=30)
-        see_your_previous_results.pack(pady=30)
-        add_and_edit_your_quizzes.pack(pady=30)
+        quit_button = Button(self, text="Quit", command=self.master.destroy, height=6,
+                                           width=60)
+        take_a_quiz.pack(pady=20)
+        see_your_previous_results.pack(pady=20)
+        add_and_edit_your_quizzes.pack(pady=20)
+        quit_button.pack(pady=20)
 
     def take(self):
         Listview(root).pack()

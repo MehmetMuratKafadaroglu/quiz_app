@@ -124,7 +124,6 @@ class GenericTree(Frame):
         for pk in ids:
             self.delete(pk)
 
-
 class EditMainButtons(Frame):
     def __init__(self, master, back, press, delete, edit, update, txt="Edit"):
         Frame.__init__(self, master)
@@ -144,7 +143,7 @@ class EditMainButtons(Frame):
 
         self.edit_button = Button(self, text=txt, command=edit, height=5, width=24)
         self.edit_button.grid(row=0, column=4)
-
+        
 
 class TakeQuizButtons(Frame):
     def __init__(self, master, back, take, txt=None):
@@ -228,4 +227,5 @@ class Results(Frame):
 
     def exit(self):
         self.master.exit()
+
 
