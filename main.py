@@ -1,4 +1,3 @@
-from http.client import PROXY_AUTHENTICATION_REQUIRED
 from objects import *
 from generic_widgets import *
 import random
