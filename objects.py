@@ -1,6 +1,6 @@
 import sqlite3
-import time
 """
+Made by 001143514
 Objects file is a file that retrives, deletes, edit data from/to main.
 This file makes queries and put them to python objects when data is required.
 When data needs to be edited, deleted or saved objects are initialised in main file and methods of the class is called

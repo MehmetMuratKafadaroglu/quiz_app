@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter.ttk import Combobox, Treeview
 """
+Made by 001143514
 Generic widgets gives generic widgets and functions to main file.
 This file exist to decrease the duplication in main file.
 This file should not communicate with database/objects this file should only communicate with the main file

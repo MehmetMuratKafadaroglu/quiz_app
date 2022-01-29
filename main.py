@@ -3,6 +3,7 @@ from generic_widgets import *
 import random
 
 """"
+Made by 001143514
 Main file where we put everything together.
 This file takes the data from objects and takes the UI widgets from generic widgets.
 This file is the file where things are put together.
