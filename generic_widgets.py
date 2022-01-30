@@ -1,4 +1,3 @@
-from re import T
 from tkinter import *
 from tkinter.ttk import Combobox, Treeview
 """
