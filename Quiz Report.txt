@@ -1,0 +1,10 @@
+Question: 'Is python supports functional programming ?' 
+Times taken:1
+Question: 'Who is considered founder of computer science ?' 
+Times taken:1
+Question: 'What is the first high level language ?' 
+Times taken:1
+Question: 'Is python statically typed language' 
+Times taken:1
+Question: 'Which option is not a python data type' 
+Times taken:1

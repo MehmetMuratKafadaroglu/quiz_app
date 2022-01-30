@@ -574,17 +574,24 @@ class QuizReport(Frame):
         self.master.adjust_height(380)
         for question in self.questions:
             txt = "Question: {}\nTimes taken:{}".format(question[1], question[4])
-            Label(self, text=txt,height=3, borderwidth=2, relief="groove").pack(fill=X, expand=True, pady=3)
+            Label(self, text=txt,height=3).pack(fill=X, expand=True, pady=3)
         
-        back = Button(self, text="Back", command=self.back, height=5)
-        back.pack(fill=X, expand=True)
-
+        btns = TakeQuizButtons(self, self.back, self.take_report_as_txt, "Take report as txt file")
+        btns.pack()
     def back(self):
         page = PreviousResults(root)
         page.pack()
         self.master.adjust_height(600)
         self.pack_forget()
 
+    def take_report_as_txt(self):
+        f = open("Quiz Report.txt", 'w')
+        for question in self.questions:
+            txt = "Question: '{}' Times taken:{}\n".format(question[1], question[4])
+            f.write(txt)
+        f.close()
+        RaiseMessage("\n \n Report have successfully written \n \n \n")
+        self.back()
 
 class ResultPage(Frame):
     def __init__(self, master, results, why_iscorrect):
