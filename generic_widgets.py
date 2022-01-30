@@ -1,3 +1,4 @@
+from re import T
 from tkinter import *
 from tkinter.ttk import Combobox, Treeview
 """
@@ -157,6 +158,18 @@ class TakeQuizButtons(Frame):
         self.take_button = Button(self, text=txt, command=take, height=5, width=60)
         self.take_button.grid(row=0, column=1)
 
+class ResultsPageButtons(Frame):
+    def __init__(self, master, back, delete, get_report):
+        Frame.__init__(self, master)
+        self.master = master
+        self.back_button = Button(self, text="Back", command=back, height=5, width=40)
+        self.back_button.grid(row=0, column=0)
+
+        self.delete_button= Button(self, text="Clear Results", command=delete, height=5, width=40)
+        self.delete_button.grid(row=0, column=1)
+
+        self.get_rep_button = Button(self, text="Get Report", command=get_report, height=5, width=40)
+        self.get_rep_button.grid(row=0, column=2)
 
 class RaiseMessage(Toplevel):
     def __init__(self, message):

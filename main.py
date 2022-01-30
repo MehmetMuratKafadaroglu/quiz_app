@@ -1,3 +1,4 @@
+import stat
 from objects import *
 from generic_widgets import *
 import random
@@ -535,10 +536,18 @@ class PreviousResults(Frame):
         self.tree = GenericTree(self, {'result': 'Result', 'date': 'Date', 'quiz': 'Quiz', 'module': 'Module'})
         self.tree.pack()
         self.refresh()
-        btn = TakeQuizButtons(self, self.press, self.delete_result, txt="Delete All Results")
+        btn = ResultsPageButtons(self, self.back, self.delete_result, self.get_report)
         btn.pack()
 
-    def press(self):
+    def get_selected_quiz(self):
+        item = self.tree.selected_item()
+        item = self.tree.get_item(item)
+        module = Module(item[3])
+        quiz = Quiz(item[2], 1)
+        pk = quiz.get_id(module)
+        return pk
+
+    def back(self):
         start.pack()
         root.go_back_to_start_geom()
         self.pack_forget()
@@ -550,6 +559,31 @@ class PreviousResults(Frame):
     def delete_result(self):
         Custom.delete_all_results()
         self.refresh()
+
+    def get_report(self):
+        questions = Question().refresh(self.get_selected_quiz())
+        rep = QuizReport(root, [questions])
+        rep.pack()
+        self.pack_forget()
+
+class QuizReport(Frame):
+    def __init__(self, master, questions):
+        Frame.__init__(self, master)
+        self.master = master
+        self.questions = questions[0]
+        self.master.adjust_height(380)
+        for question in self.questions:
+            txt = "Question: {}\nTimes taken:{}".format(question[1], question[4])
+            Label(self, text=txt,height=3, borderwidth=2, relief="groove").pack(fill=X, expand=True, pady=3)
+        
+        back = Button(self, text="Back", command=self.back, height=5)
+        back.pack(fill=X, expand=True)
+
+    def back(self):
+        page = PreviousResults(root)
+        page.pack()
+        self.master.adjust_height(600)
+        self.pack_forget()
 
 
 class ResultPage(Frame):
@@ -660,11 +694,13 @@ class Listview(Frame):
         module = self.get_selected_module()
         questions = self.get_questions_of_selected_quiz(quiz, module)
         if quiz.israndomized:
-            random.shuffle(questions)
+            questions = random.sample(questions, 5)
+            Custom.taken(questions)
         question_view = AnswerView(root, questions, self.quiz_id)
         question_view.pack()
         self.pack_forget()
 
+   
     def back(self):
         start.pack()
         self.pack_forget()

@@ -257,11 +257,6 @@ class Quiz(Base):
         con.close()
         return copy
 
-    def get_question_from_db(self):
-        con = sqlite3.connect('question_bank.db')
-        cur = con.cursor()
-        cur.execute("SELECT * FROM questions WHERE quiz_id="" ")
-
     def save(self, related_class):
         name, israndomized = self.name, self.israndomized
         foreign_key = related_class.get_id()
@@ -385,7 +380,6 @@ class Question(Base):
             final.append(question)
         return final
 
-
 # This is the answer of a question. Answers are related to modules
 class Answer(Base):
     def __init__(self, description=None, iscorrect=None, why_iscorrect=None):
@@ -497,6 +491,7 @@ class Custom:
             question VARCHAR(50),
             question_type INTEGER,
             quiz_id INTEGER,
+            number_of_times_taken INTEGER DEFAULT 0,
             UNIQUE(question, quiz_id),
             FOREIGN KEY(quiz_id) REFERENCES quizes(id)
             );
@@ -577,5 +572,15 @@ class Custom:
         con = sqlite3.connect('question_bank.db')
         cur = con.cursor()
         cur.execute("DELETE FROM results")
+        con.commit()
+        con.close()
+
+    @staticmethod
+    def taken(questions):
+        con = sqlite3.connect('question_bank.db')
+        cur = con.cursor()
+        for question in questions:
+            cur.execute("UPDATE questions SET number_of_times_taken = \
+            number_of_times_taken + 1 WHERE question = ?  AND question_type = ?", [question.question, question.question_type])
         con.commit()
         con.close()
