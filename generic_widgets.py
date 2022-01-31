@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter.ttk import Combobox, Treeview
+from tkinter import messagebox
 """
 Made by 001143514
 Generic widgets gives generic widgets and functions to main file.
@@ -169,14 +170,6 @@ class ResultsPageButtons(Frame):
 
         self.get_rep_button = Button(self, text="Get Report", command=get_report, height=5, width=40)
         self.get_rep_button.grid(row=0, column=2)
-
-class RaiseMessage(Toplevel):
-    def __init__(self, message):
-        Toplevel.__init__(self)
-        self.message = message
-        self.display = Label(self, text=message)
-        self.display.pack(fill=BOTH, expand=1)
-        self.geometry('400x50')
 
 
 class AnswersAndLabel(Frame):

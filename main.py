@@ -24,9 +24,9 @@ class App(Tk):
         self.height = 600
         self.title("Quiz App")
         self.start_geom = "900x600"
+        self.resizable(0,0)
         self.geometry(self.start_geom)
         Custom.create()
-
     def adjust_height(self, number):
         self.geometry("900x%s" % number)
 
@@ -36,18 +36,17 @@ class App(Tk):
 
 root = App()
 
-
 class StartPage(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
         self.master = master
-        take_a_quiz = Button(self, text="Take a Quiz!", command=self.take, height=6, width=60)
-        see_your_previous_results = Button(self, text="See your previous results", command=self.previous_results,
+        take_a_quiz = Button(self, text=" Take a Quiz!", command=self.take, height=6, width=60)
+        see_your_previous_results = Button(self, text=" See your previous results", command=self.previous_results,
                                            height=6,
                                            width=60)
-        add_and_edit_your_quizzes = Button(self, text="Add and edit your quizes", command=self.edit_and_add, height=6,
+        add_and_edit_your_quizzes = Button(self, text=" Add and edit your quizes", command=self.edit_and_add, height=6,
                                            width=60)
-        quit_button = Button(self, text="Quit", command=self.master.destroy, height=6,
+        quit_button = Button(self, text=" Quit", command=self.master.destroy, height=6,
                                            width=60)
         take_a_quiz.pack(pady=20)
         see_your_previous_results.pack(pady=20)
@@ -86,7 +85,7 @@ class UpdateAddModule(Toplevel):
         save.pack(fill=X, expand=True)
 
     def raise_message(self):
-        RaiseMessage("Module name must not be taken or blank")
+        messagebox.showinfo('Alert', "Module name must not be taken or blank")
 
     def get_module(self):
         module_name = self.name.get_input()
@@ -128,10 +127,12 @@ class ModulePage(Frame):
         UpdateAddModule(title)
 
     def update(self):
-        title = "Update module"
         item = self.tree.selected_item()
-        item = self.tree.get_item(item)
-        UpdateAddModule(title, item)
+        if item:
+            item = self.tree.get_item(item)
+            UpdateAddModule("Update module", item)
+        else:
+            messagebox.showinfo('Alert', 'You need to select Module')
 
     def refresh(self):
         tree = self.tree
@@ -140,24 +141,27 @@ class ModulePage(Frame):
 
     def edit(self):
         item = self.tree.selected_item()
-        if item is None:
-            return
-        item = self.tree.get_item(item)
-        item = item[0]
-        module = Module(name=item)
-        global register_module
-        register_module = module
-        self.pack_forget()
-        quiz_page.pack(fill=BOTH, expand=True)
-        quiz_page.refresh()
+        if item:
+            item = self.tree.get_item(item)
+            item = item[0]
+            module = Module(name=item)
+            global register_module
+            register_module = module
+            self.pack_forget()
+            quiz_page.pack(fill=BOTH, expand=True)
+            quiz_page.refresh()
+        else:
+            messagebox.showinfo('Alert', 'You need to select Module')
 
     def delete(self):
         item = self.tree.selected_item()
-        carry_item = self.tree.get_item(item)
-        self.tree.delete(item)
-        carry_item = carry_item[0]
-        Module(name=carry_item).delete()
-
+        if item:
+            carry_item = self.tree.get_item(item)
+            self.tree.delete(item)
+            carry_item = carry_item[0]
+            Module(name=carry_item).delete()
+        else:
+            messagebox.showinfo('Alert', 'You need to select Module')
 
 class UpdateAddQuiz(Toplevel):
     def __init__(self, is_add=True):
@@ -178,7 +182,7 @@ class UpdateAddQuiz(Toplevel):
         save.pack(fill=X, expand=True)
 
     def raise_message(self):
-        RaiseMessage("Quiz name must not be taken or blank")
+        messagebox.showinfo('Alert', "Quiz name must not be taken or blank")
 
     def get_quiz(self):
         quiz_name = self.name.get_input()
@@ -224,20 +228,25 @@ class QuizPage(Frame):
 
     def get_selected_quiz(self):
         item = self.tree.selected_item()
-        item = self.tree.get_item(item)
-        name = item[0]
-        if item[1] == 'Randomized':
-            status = 1
+        if item:
+            item = self.tree.get_item(item)
+            name = item[0]
+            if item[1] == 'Randomized':
+                status = 1
+            else:
+                status = 0
+            quiz = Quiz(name=name, israndomized=status)
+            return quiz
         else:
-            status = 0
-        quiz = Quiz(name=name, israndomized=status)
-        return quiz
+            messagebox.showinfo('Alert', "You must choose a quiz")
+            return
 
     def update(self):
         quiz = self.get_selected_quiz()
-        global register_quiz
-        register_quiz = quiz
-        UpdateAddQuiz(is_add=False)
+        if quiz:
+            global register_quiz
+            register_quiz = quiz
+            UpdateAddQuiz(is_add=False)
 
     def refresh(self):
         if register_module is not None:
@@ -268,14 +277,17 @@ class QuizPage(Frame):
 
     def delete(self):
         item = self.tree.selected_item()
-        carry_item = self.tree.get_item(item)
-        self.tree.delete(item)
+        if item:
+            carry_item = self.tree.get_item(item)
+            self.tree.delete(item)
 
-        if carry_item[1] == "Randomized":
-            carry_item = replace_elements(carry_item, "Randomized", 1)
+            if carry_item[1] == "Randomized":
+                carry_item = replace_elements(carry_item, "Randomized", 1)
+            else:
+                carry_item = replace_elements(carry_item, "Not Randomized", 0)
+            Quiz(name=carry_item[0], israndomized=carry_item[1]).delete(register_module)
         else:
-            carry_item = replace_elements(carry_item, "Not Randomized", 0)
-        Quiz(name=carry_item[0], israndomized=carry_item[1]).delete(register_module)
+            messagebox.showinfo('Alert', "You must choose a quiz")
 
 
 class UpdateAddQuestions(Toplevel):
@@ -299,7 +311,7 @@ class UpdateAddQuestions(Toplevel):
         save.pack(fill=X, expand=True)
 
     def raise_message(self):
-        RaiseMessage("Question values must not be taken or blank")
+        messagebox.showinfo('Alert', 'Question values must not be taken or blank')
 
     def get_question_type(self):
         question_type = self.question_type.get_input()
@@ -349,21 +361,27 @@ class QuestionPage(Frame):
 
     def get_selected_question(self):
         item = self.tree.selected_item()
-        item = self.tree.get_item(item)
+        if item:
+            item = self.tree.get_item(item)
 
-        question = item[0]
-        question_type = item[1]
-        question = Question(question=question, question_type=question_type)
-        return question
+            question = item[0]
+            question_type = item[1]
+            question = Question(question=question, question_type=question_type)
+            return question
+        else:
+            messagebox.showinfo('Alert', "You must choose a question")
+            return
+
 
     def add(self):
         UpdateAddQuestions(True)
 
     def update(self):
         question = self.get_selected_question()
-        global register_question
-        register_question = question
-        UpdateAddQuestions(False)
+        if question:
+            global register_question
+            register_question = question
+            UpdateAddQuestions(False)
 
     def get_question_type(self, number):
         if number == 1:
@@ -399,10 +417,13 @@ class QuestionPage(Frame):
 
     def delete(self):
         item = self.tree.selected_item()
-        carry_item = self.tree.get_item(item)
-        self.tree.delete(item)
-        question_type = carry_item[1]
-        Question(question=carry_item[0], question_type=question_type).delete(register_quiz, register_module)
+        if item:
+            carry_item = self.tree.get_item(item)
+            self.tree.delete(item)
+            question_type = carry_item[1]
+            Question(question=carry_item[0], question_type=question_type).delete(register_quiz, register_module)
+        else:
+            messagebox.showinfo('Alert', "You must choose a quiz")
 
 
 class UpdateAddAnswers(Toplevel):
@@ -425,7 +446,7 @@ class UpdateAddAnswers(Toplevel):
         save.pack(fill=X, expand=True)
 
     def raise_message(self):
-        RaiseMessage("Answer values must not be taken or blank")
+        messagebox.showinfo('Alert', "Answer values must not be taken or blank")
 
     def get_answer(self):
         description = self.answer.get_input()
@@ -477,12 +498,16 @@ class AnswerPage(Frame):
 
     def update(self):
         answer = self.get_selected_answer()
-        global register_answer
-        register_answer = answer
-        UpdateAddAnswers(False)
+        if answer:
+            global register_answer
+            register_answer = answer
+            UpdateAddAnswers(False)
 
     def get_selected_answer(self):
         item = self.tree.selected_item()
+        if not item:
+            messagebox.showinfo('Alert', 'You must choose an option')
+            return
         item = self.tree.get_item(item)
 
         description = item[0]
@@ -512,6 +537,8 @@ class AnswerPage(Frame):
 
     def delete(self):
         item = self.tree.selected_item()
+        if not item:
+            return messagebox.showinfo("Alert", "Plase choose an answer")
         carry_item = self.tree.get_item(item)
         self.tree.delete(item)
 
@@ -541,11 +568,14 @@ class PreviousResults(Frame):
 
     def get_selected_quiz(self):
         item = self.tree.selected_item()
-        item = self.tree.get_item(item)
-        module = Module(item[3])
-        quiz = Quiz(item[2], 1)
-        pk = quiz.get_id(module)
-        return pk
+        if item:
+            item = self.tree.get_item(item)
+            module = Module(item[3])
+            quiz = Quiz(item[2], 1)
+            pk = quiz.get_id(module)
+            return pk
+        else:
+            return messagebox.showinfo('Alert', "You must choose a quiz")
 
     def back(self):
         start.pack()
@@ -561,10 +591,13 @@ class PreviousResults(Frame):
         self.refresh()
 
     def get_report(self):
-        questions = Question().refresh(self.get_selected_quiz())
-        rep = QuizReport(root, [questions])
-        rep.pack()
-        self.pack_forget()
+        try:
+            questions = Question().refresh(self.get_selected_quiz())
+            rep = QuizReport(root, [questions])
+            rep.pack()
+            self.pack_forget()
+        except:
+            return
 
 class QuizReport(Frame):
     def __init__(self, master, questions):
@@ -590,13 +623,14 @@ class QuizReport(Frame):
             txt = "Question: '{}' Times taken:{}\n".format(question[1], question[4])
             f.write(txt)
         f.close()
-        RaiseMessage("\n \n Report have successfully written \n \n \n")
+        messagebox.showinfo("Message","\n \n Report have successfully written \n \n \n")
         self.back()
 
 class ResultPage(Frame):
     def __init__(self, master, results, why_iscorrect):
         Frame.__init__(self, master)
         self.master = master
+        self.master.adjust_height(600)
         self.results = results
         self.why_iscorrect = why_iscorrect
         Results(self, self.results, self.why_iscorrect).pack(fill=BOTH, expand=True)
@@ -697,8 +731,11 @@ class Listview(Frame):
         self.index += 1
 
     def take(self):
-        quiz = self.get_selected_quiz()
-        module = self.get_selected_module()
+        try:
+            quiz = self.get_selected_quiz()
+            module = self.get_selected_module()
+        except:
+            return messagebox.showinfo("Alert", "The Quiz is empty")
         questions = self.get_questions_of_selected_quiz(quiz, module)
         if quiz.israndomized:
             questions = random.sample(questions, 5)
@@ -707,7 +744,7 @@ class Listview(Frame):
         question_view.pack()
         self.pack_forget()
 
-   
+
     def back(self):
         start.pack()
         self.pack_forget()

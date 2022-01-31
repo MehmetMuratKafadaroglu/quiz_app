@@ -471,14 +471,14 @@ class Custom:
         cur.execute("""CREATE TABLE IF NOT EXISTS 
             modules(
             id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            name VARCHAR(50),
+            name VARCHAR(500),
             UNIQUE(name)
             );
             """)
         cur.execute("""CREATE TABLE IF NOT EXISTS
             quizes(
             id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            name VARCHAR(50), 
+            name VARCHAR(500), 
             is_randomized INTEGER, 
             module_id INTEGER,
             UNIQUE(name, module_id),
@@ -488,7 +488,7 @@ class Custom:
         cur.execute("""CREATE TABLE IF NOT EXISTS 
             questions(
             id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            question VARCHAR(50),
+            question VARCHAR(500),
             question_type INTEGER,
             quiz_id INTEGER,
             number_of_times_taken INTEGER DEFAULT 0,
