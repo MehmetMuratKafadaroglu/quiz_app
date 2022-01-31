@@ -268,12 +268,13 @@ class QuizPage(Frame):
 
     def edit(self):
         quiz = self.get_selected_quiz()
-        global register_quiz
-        register_quiz = quiz
+        if quiz:
+            global register_quiz
+            register_quiz = quiz
 
-        self.pack_forget()
-        question_page.pack(fill=BOTH, expand=True)
-        question_page.refresh()
+            self.pack_forget()
+            question_page.pack(fill=BOTH, expand=True)
+            question_page.refresh()
 
     def delete(self):
         item = self.tree.selected_item()
@@ -321,9 +322,6 @@ class UpdateAddQuestions(Toplevel):
             return 2
         elif question_type == self.options[2]:
             return 3
-        else:
-            print(self.options)
-            raise ValueError("Question type must be one of the options")
 
     def get_question(self):
         question = self.name.get_input()
@@ -409,11 +407,12 @@ class QuestionPage(Frame):
 
     def edit(self):
         question = self.get_selected_question()
-        global register_question
-        register_question = question
-        self.pack_forget()
-        answer_page.pack(fill=BOTH, expand=True)
-        answer_page.refresh()
+        if question:
+            global register_question
+            register_question = question
+            self.pack_forget()
+            answer_page.pack(fill=BOTH, expand=True)
+            answer_page.refresh()
 
     def delete(self):
         item = self.tree.selected_item()
@@ -538,7 +537,7 @@ class AnswerPage(Frame):
     def delete(self):
         item = self.tree.selected_item()
         if not item:
-            return messagebox.showinfo("Alert", "Plase choose an answer")
+            return messagebox.showinfo("Alert", "Plase choose an option")
         carry_item = self.tree.get_item(item)
         self.tree.delete(item)
 

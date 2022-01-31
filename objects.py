@@ -326,10 +326,8 @@ class Question(Base):
             return 1
         elif typ == 'True False Question':
             return 2
-        elif typ == 'Best Match Question':
-            return 3
         else:
-            raise ValueError("Value must be between 1-3")
+            return 3
 
     @question_type.setter
     def question_type(self, question_type):
