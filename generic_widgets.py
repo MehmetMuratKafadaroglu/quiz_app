@@ -92,7 +92,7 @@ class GenericTree(Frame):
         self.master = master
         keys = dict.keys()
         self.columns = list(keys)
-        self.tree = Treeview(master, columns=self.columns, show="headings", height=25)
+        self.tree = Treeview(master, columns=self.columns, show="headings", height=25, selectmode="browse")
         for key in keys:
             self.tree.heading(key, text=dict[key], anchor=CENTER)
         self.tree.pack(fill=X)
