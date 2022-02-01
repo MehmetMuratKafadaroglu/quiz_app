@@ -1,4 +1,3 @@
-import stat
 from objects import *
 from generic_widgets import *
 import random
@@ -625,6 +624,7 @@ class QuizReport(Frame):
         messagebox.showinfo("Message","\n \n Report have successfully written \n \n \n")
         self.back()
 
+
 class ResultPage(Frame):
     def __init__(self, master, results, why_iscorrect):
         Frame.__init__(self, master)
@@ -650,7 +650,6 @@ class AnswerView(Frame):
         self.why_iscorrect = []
         self.question = self.questions[self.question_index]
         self.results = []
-
         self.btn = AnswersAndLabel(master=self, question=self.question)
         self.btn.pack()
 
@@ -736,6 +735,9 @@ class Listview(Frame):
         except:
             return messagebox.showinfo("Alert", "The Quiz is empty")
         questions = self.get_questions_of_selected_quiz(quiz, module)
+        if len(questions) < 5:
+            messagebox.showinfo("Alert", "Questions must be over 5")
+            return
         if quiz.israndomized:
             questions = random.sample(questions, 5)
             Custom.taken(questions)
